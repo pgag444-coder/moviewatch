@@ -1,1201 +1,398 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StreamValue</title>
+    <title>60-in-1 Super App: Жизнь, Кухня и Быт</title>
     <style>
-        :root {
-            --bg-main: #171a21;
-            --bg-card: #2a475e;
-            --text-main: #c7d5e0;
-            --accent: #66c0f4;
-            --accent-hover: #4192c0;
-            --gold: #ffd700;
-            --gold-hover: #ffaa00;
-            --danger: #ff4c4c;
-            --storage-bg: #3d4450;
-            --storage-fill: #4CAF50;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-main);
-        }
-
-        /* Navigation */
-        .navbar {
-            background-color: #101214;
-            padding: 15px 30px;
-            display: flex;
-            align-items: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .brand-group {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            margin-right: 30px;
-            gap: 5px;
-        }
-
-        .navbar h2 { 
-            margin: 0; 
-            color: var(--accent); 
-            cursor: pointer; 
-            transition: transform 0.2s ease, opacity 0.2s ease;
-            white-space: nowrap;
-        }
-        .navbar h2:hover {
-            transform: scale(1.03);
-            opacity: 0.9;
-        }
-
-        /* Storage Meter UI */
-        .storage-container {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            gap: 4px;
-            width: 140px;
-        }
-
-        .storage-text {
-            font-size: 11px;
-            color: #8f98a0;
-            text-align: left;
-            font-weight: bold;
-            line-height: 1;
-        }
-
-        .storage-bar {
-            width: 100%;
-            height: 6px;
-            background-color: var(--storage-bg);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .storage-fill {
-            height: 100%;
-            background-color: var(--storage-fill);
-            width: 0%;
-            transition: width 0.4s ease, background-color 0.4s ease;
-        }
+        :root { --primary: #f59e0b; --secondary: #ef4444; --bg: #111827; --surface: rgba(31, 41, 55, 0.8); --text: #f9fafb; --accent: #10b981; }
         
-        .storage-fill.warning { background-color: #ffa500; }
-        .storage-fill.danger { background-color: var(--danger); }
+        body { 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
+            background: linear-gradient(-45deg, #111827, #451a03, #1e1b4b, #064e3b);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: var(--text); margin: 0; padding: 20px; 
+            display: flex; flex-direction: column; align-items: center; 
+            min-height: 100vh; transition: color 0.3s;
+        }
+        @keyframes gradientBG { 0% {background-position: 0% 50%;} 50% {background-position: 100% 50%;} 100% {background-position: 0% 50%;} }
+
+        /* --- СВЕТЛАЯ ТЕМА --- */
+        body.light-theme {
+            --primary: #3b82f6; --secondary: #10b981; --bg: #f3f4f6; --surface: rgba(255, 255, 255, 0.95); --text: #1f2937; --accent: #3b82f6;
+            background: linear-gradient(-45deg, #e5e7eb, #d1d5db, #f9fafb, #cbd5e1);
+            background-size: 400% 400%;
+        }
+        body.light-theme .app-section { border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+        body.light-theme .tabs button { background: rgba(0, 0, 0, 0.05); border: 1px solid rgba(0,0,0,0.1); color: var(--text); }
+        body.light-theme .tabs button:hover { background: rgba(0, 0, 0, 0.1); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        body.light-theme .filter-btn { background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.2); color: var(--text); }
+        body.light-theme .filter-btn.active-filter { background: var(--primary); color: white; border-color: transparent; }
+        body.light-theme input, body.light-theme textarea, body.light-theme select { background: white; color: var(--text); border: 1px solid #ccc; }
+        body.light-theme input:focus, body.light-theme textarea:focus, body.light-theme select:focus { border-color: var(--primary); }
+        body.light-theme li { background: white; border: 1px solid #e5e7eb; }
+        body.light-theme .output-box { color: #ea580c; }
+        body.light-theme #app-search { background: white; color: var(--text); border: 1px solid #ccc; }
+        body.light-theme #app-search::placeholder { color: #9ca3af; }
+
+        .theme-toggle { position: absolute; top: 20px; right: 20px; background: transparent; border: none; font-size: 1.8rem; cursor: pointer; transition: 0.3s; }
+        .theme-toggle:hover { transform: scale(1.2); }
+
+        h1 { text-align: center; font-size: 2.2rem; margin-bottom: 10px; text-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-top: 10px; }
         
-        .nav-links { display: flex; gap: 15px; flex-grow: 1; align-items: center; }
+        .search-container { margin-bottom: 15px; width: 100%; max-width: 500px; display: flex; gap: 10px; flex-direction: column; }
         
-        .nav-links button {
-            background: none; 
-            border: none; 
-            color: var(--text-main);
-            font-size: 16px; 
-            cursor: pointer; 
-            padding: 5px 10px;
-            position: relative;
-            transition: color 0.3s ease;
+        #app-search { 
+            width: 100%; padding: 12px 20px; border-radius: 30px; border: none; 
+            background: rgba(255,255,255,0.1); color: var(--text); font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); outline: none; backdrop-filter: blur(10px);
+            box-sizing: border-box; transition: background 0.3s;
         }
-
-        .nav-links button::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 50%;
-            width: 0;
-            height: 2px;
-            background-color: var(--accent);
-            transition: width 0.3s ease, left 0.3s ease;
-        }
-
-        .nav-links button:hover::after, 
-        .nav-links button.active::after {
-            width: 100%;
-            left: 0;
-        }
-
-        .nav-links button:hover, 
-        .nav-links button.active { 
-            color: var(--accent); 
-        }
-
-        .btn-redeem-nav {
-            color: var(--gold) !important;
-            font-weight: bold;
-        }
-        .btn-redeem-nav::after {
-            background-color: var(--gold) !important;
-        }
-
-        /* Auth Controls */
-        .auth-controls {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            margin-left: auto;
-        }
+        #app-search:focus { background: rgba(255,255,255,0.15); }
         
-        .user-greeting {
-            color: var(--accent);
-            font-weight: bold;
-            display: none;
+        .app-section { 
+            display: none; background: var(--surface); backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.1); padding: 25px; border-radius: 20px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4); width: 100%; max-width: 500px; 
+            text-align: center; margin-bottom: 25px; box-sizing: border-box;
+            animation: slideDown 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); 
         }
+        .active { display: block; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
 
-        .btn-logout {
-            background: var(--danger);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            display: none;
-        }
-        .btn-logout:hover { background: #e04343; }
+        .output-box { font-size: 1.5rem; font-weight: bold; margin: 15px 0; color: #fcd34d; min-height: 40px; display: flex; justify-content: center; align-items: center; flex-direction: column; transition: color 0.3s; }
+        @keyframes popOut { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+        .pop-anim { animation: popOut 0.3s ease; }
 
-        .search-container {
-            display: flex;
-            gap: 10px;
-            margin-left: 15px;
+        .filters { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; width: 100%; max-width: 1000px; }
+        .filter-btn {
+            background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 8px 15px;
+            border-radius: 20px; color: var(--text); cursor: pointer; transition: 0.3s; font-size: 0.9rem;
         }
+        .filter-btn:hover { background: rgba(255,255,255,0.1); }
+        .filter-btn.active-filter { background: var(--primary); color: white; border-color: transparent; font-weight: bold; }
 
-        .search-bar {
-            padding: 8px 15px;
-            border-radius: 20px;
-            border: none;
-            background: #2a3f54;
-            color: white;
-            outline: none;
-            transition: box-shadow 0.3s ease, background-color 0.3s ease;
-        }
-
-        .search-bar:focus {
-            box-shadow: 0 0 8px rgba(102, 192, 244, 0.5);
-            background-color: #314a63;
-        }
+        .tabs { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-bottom: 40px; width: 100%; max-width: 1000px; }
         
-        select.search-bar { cursor: pointer; padding-right: 30px; }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
+        .tabs button {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px); border-radius: 12px; padding: 10px; 
+            color: var(--text); cursor: pointer; font-weight: 600; font-size: 0.9rem;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            animation: fadeIn 0.5s ease backwards;
         }
-
-        .container { padding: 30px; display: none; }
-        .container.active { 
-            display: block; 
-            animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .movie-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 20px;
-        }
+        .tabs button:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); border-color: rgba(255,255,255,0.3); }
+        .tabs button.active-tool { background: linear-gradient(135deg, var(--accent), #059669); color: white; border-color: transparent; box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4); }
 
-        .movie-card {
-            background-color: var(--bg-card);
-            border-radius: 8px;
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            position: relative;
-        }
+        .app-btn { background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 5px; transition: transform 0.1s; }
+        .app-btn:active { transform: scale(0.95); }
 
-        .movie-card:hover { 
-            transform: translateY(-8px) scale(1.02); 
-            box-shadow: 0 12px 24px rgba(0,0,0,0.5), 0 0 15px rgba(102, 192, 244, 0.2);
-        }
-
-        .movie-card.premium {
-            border: 2px solid var(--gold);
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.15);
-        }
-        .movie-card.premium:hover {
-            box-shadow: 0 12px 24px rgba(0,0,0,0.6), 0 0 20px rgba(255, 215, 0, 0.4);
-        }
-
-        .premium-badge {
-            position: absolute; top: 10px; right: 10px;
-            background: linear-gradient(45deg, #ffd700, #ffaa00);
-            color: #000; padding: 5px 10px; font-size: 12px;
-            font-weight: bold; border-radius: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5); z-index: 10;
-        }
-
-        .size-badge {
-            position: absolute; top: 10px; left: 10px;
-            background: rgba(0,0,0,0.7);
-            color: #fff; padding: 4px 8px; font-size: 11px;
-            font-weight: bold; border-radius: 4px;
-            z-index: 10; border: 1px solid rgba(255,255,255,0.2);
-        }
+        input, textarea, select { padding: 10px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; margin: 5px; width: 80%; max-width: 250px; background: rgba(0,0,0,0.3); color: var(--text); outline: none; transition: 0.3s; }
+        input:focus, textarea:focus, select:focus { border-color: var(--primary); }
         
-        .movie-img {
-            width: 100%; height: 300px; object-fit: cover;
-            background: #000; transition: transform 0.4s ease;
-        }
-
-        .movie-card:hover .movie-img { transform: scale(1.08); }
-
-        .movie-info { padding: 15px; position: relative; z-index: 5; background: var(--bg-card); }
-        .movie-title { margin: 0 0 5px 0; font-size: 18px; }
-        .movie-genre { color: #8f98a0; font-size: 12px; margin-bottom: 15px; }
-
-        .card-actions { display: flex; gap: 10px; }
-        
-        .btn {
-            flex: 1; padding: 8px; border: none; border-radius: 4px;
-            cursor: pointer; font-weight: bold; 
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .btn:active { transform: scale(0.94); }
-
-        .btn-watch { background-color: var(--accent); color: #000; }
-        .btn-watch:hover { 
-            background-color: var(--accent-hover); 
-            box-shadow: 0 0 10px rgba(102, 192, 244, 0.4);
-        }
-
-        .btn-locked { background-color: #333; color: #888; cursor: not-allowed; }
-        .btn-locked:hover { background-color: #444; }
-
-        .btn-add { background-color: #3d4450; color: white; }
-        .btn-add:hover { background-color: #4d5665; }
-
-        .btn-added { background-color: var(--storage-fill); color: white; pointer-events: none; }
-        .btn-remove { background-color: var(--danger); color: white; }
-        .btn-remove:hover { background-color: #e04343; }
-
-        /* Forms & Boxes */
-        .box-panel {
-            max-width: 480px; margin: 0 auto; background: var(--bg-card);
-            padding: 25px; border-radius: 8px; display: flex; flex-direction: column; gap: 15px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-        }
-
-        .box-panel input {
-            padding: 10px; border-radius: 4px; border: none;
-            background: #171a21; color: white; outline: none;
-            transition: box-shadow 0.2s ease;
-        }
-        .box-panel input:focus { box-shadow: 0 0 0 2px var(--accent); }
-        
-        .box-panel button {
-            padding: 10px; background: var(--accent); border: none;
-            border-radius: 4px; color: #000; font-weight: bold; cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-        }
-        .box-panel button:hover { background: var(--accent-hover); }
-        .box-panel button:active { transform: scale(0.97); }
-
-        .btn-gold {
-            background: linear-gradient(45deg, #ffd700, #ffaa00) !important;
-            color: #000 !important;
-        }
-
-        .top-instructions {
-            background: #171a21; padding: 15px; border-radius: 6px;
-            font-size: 14px; line-height: 1.5; border-left: 4px solid var(--accent);
-            margin-bottom: 10px;
-        }
-        .top-instructions a {
-            color: var(--accent); text-decoration: none;
-            font-weight: bold; display: inline-block; margin-top: 8px;
-        }
-        
-        #notification-toast {
-            position: fixed; bottom: -60px; left: 50%; transform: translateX(-50%);
-            background: var(--accent); color: #000; padding: 12px 24px;
-            border-radius: 20px; font-weight: bold; z-index: 1000; 
-            box-shadow: 0 6px 20px rgba(0,0,0,0.5); opacity: 0;
-            transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
-        }
-        #notification-toast.show { bottom: 30px; opacity: 1; }
-        #notification-toast.gold { background: linear-gradient(45deg, #ffd700, #ffaa00); }
-        #notification-toast.danger { background: var(--danger); color: white; 
-        }
-        /* --- Light Theme Overrides --- */
-body.light-mode {
-    --bg-main: #f0f2f5;
-    --bg-card: #ffffff;
-    --text-main: #171a21;
-    --storage-bg: #d1d5da;
-}
-
-body.light-mode .navbar {
-    background-color: #ffffff;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-
-body.light-mode .search-bar,
-body.light-mode .box-panel input {
-    background: #e1e4e8;
-    color: #171a21;
-}
-
-body.light-mode .movie-info {
-    border-top: 1px solid #e1e4e8;
-}
-
-/* Floating Theme Toggle Button */
-.theme-toggle-btn {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background-color: var(--accent);
-    color: #000;
-    border: none;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    font-size: 24px;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-    z-index: 1000;
-    transition: transform 0.2s ease, background-color 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.theme-toggle-btn:hover {
-    transform: scale(1.1);
-    background-color: var(--accent-hover);
+        ul { list-style: none; padding: 0; }
+        li { background: rgba(0,0,0,0.3); margin: 5px 0; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05); }
+        .checked { text-decoration: line-through; opacity: 0.6; }
+        @keyframes breathe {
+    0%, 100% { transform: scale(0.6); opacity: 0.6; box-shadow: 0 0 20px rgba(56, 189, 248, 0.2); }
+    50% { transform: scale(1.5); opacity: 1; box-shadow: 0 0 50px rgba(56, 189, 248, 0.8); }
 }
     </style>
 </head>
 <body>
 
-    <div class="navbar">
-        <div class="brand-group">
-            <div id="storageContainer" class="storage-container">
-                <div class="storage-text" id="storageText">0 MB / 10 GB</div>
-                <div class="storage-bar">
-                    <div id="storageFill" class="storage-fill"></div>
-                </div>
-            </div>
-            <h2 onclick="switchTab('catalog')">StreamValue</h2>
-        </div>
-
-        <div class="nav-links">
-            <button id="tab-catalog" class="active" onclick="switchTab('catalog')">Catalog</button>
-            <button id="tab-library" onclick="switchTab('library')">My Library</button>
-            <button id="tab-add" onclick="switchTab('add')">Add New Movie</button>
-            <button id="tab-redeem" class="btn-redeem-nav" onclick="switchTab('redeem')">Redeem Code</button>
-            
-            <div class="auth-controls">
-                <button id="tab-auth" onclick="switchTab('auth')">Login / Register</button>
-                <span id="userGreeting" class="user-greeting"></span>
-                <button id="btnLogout" class="btn-logout" onclick="logoutUser()">Quit</button>
-            </div>
-        </div>
-        
-        <div class="search-container">
-            <select id="genreFilter" class="search-bar" onchange="handleSearch()">
-                <option value="">All Genres</option>
-                <option value="action">Action</option>
-                <option value="horror">Horror</option>
-                <option value="drama">Drama</option>
-                <option value="history">History</option>
-                <option value="thriller">Thriller</option>
-                <option value="fantasy">Fantasy</option>
-                <option value="cartoon">Cartoon</option>
-            </select>
-
-            <input type="text" id="searchInput" class="search-bar" placeholder="Search movies..." oninput="handleSearch()">
-        </div>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Сменить тему">🌓</button>
+    <h1>🍳 Жизнь, Кухня и Быт</h1>
+    
+    <div class="search-container">
+        <input type="text" id="app-search" placeholder="🔍 Поиск (Вода, Скидки, Топливо...)" onkeyup="searchApps()">
     </div>
 
-    <div id="view-auth" class="container">
-        <div class="box-panel">
-            <h2 style="margin: 0; text-align: center;">Account Access</h2>
-            <p style="margin: 0; font-size: 14px; text-align: center; color: #8f98a0;">
-                Log in to unlock movies and keep your personal library saved! You get 10GB of cloud storage.
-            </p>
-            <input type="text" id="authUsername" placeholder="Username" required>
-            <input type="password" id="authPassword" placeholder="Password" required>
-            <button onclick="authenticateUser()">Login / Create Account</button>
-        </div>
+    <div id="pomodoro" class="app-section active"><h2>Таймер</h2><input type="number" id="timer-input" value="25" min="1" style="width:60px;"> <span>Мин</span> <br><button class="app-btn" onclick="setTimer()">Задать</button><div class="output-box" id="timer-display" style="font-size:4rem;">25:00</div><button class="app-btn" onclick="startTimer()">Старт</button> <button class="app-btn" onclick="resetTimer()">Сброс</button></div>
+    <div id="todo" class="app-section"><h2>Список задач 💾</h2><input type="text" id="todo-input" placeholder="Задача..."><button class="app-btn" onclick="addTask()">Добавить</button><ul id="todo-list"></ul></div>
+    <div id="breathe" class="app-section"><h2>Дыхание</h2><div style="width:120px;height:120px;background:radial-gradient(circle, #38bdf8, #818cf8);border-radius:50%;margin:30px auto;animation:breathe 8s infinite ease-in-out;"></div><p>Вдох при увеличении, выдох при уменьшении.</p></div>
+    <div id="reaction" class="app-section"><h2>Тест на реакцию</h2><div id="reaction-area" style="width:100%;height:120px;background:#ef4444;color:white;display:flex;justify-content:center;align-items:center;border-radius:12px;cursor:pointer;font-size:1.5rem;" onclick="handleReaction()">Кликни для старта</div></div>
+    <div id="physics" class="app-section"><h2>Физика</h2><p>Кликай, чтобы создать шарики!</p><canvas id="physics-canvas" width="400" height="200" style="background:rgba(0,0,0,0.3);border-radius:12px;border:1px solid rgba(255,255,255,0.1);"></canvas></div>
+    <div id="password" class="app-section"><h2>Генератор паролей</h2><span>Длина:</span> <input type="number" id="pass-length" value="16" min="4" max="64"><button class="app-btn" onclick="generatePassword()">Создать</button><div class="output-box" id="pass-output" style="word-break:break-all;">...</div></div>
+    <div id="expense" class="app-section"><h2>Расходы 💾</h2><input type="text" id="exp-name" placeholder="Название"> <input type="number" id="exp-cost" placeholder="$ Цена"><button class="app-btn" onclick="addExpense()">Добавить</button><div class="output-box">Итого: $<span id="exp-total">0.00</span></div><ul id="expense-list"></ul></div>
+    <div id="words" class="app-section"><h2>Счетчик слов</h2><textarea id="text-input" rows="4" placeholder="Текст..." oninput="countText()"></textarea><p>Слова: <b id="word-count">0</b> | Символы: <b id="char-count">0</b></p></div>
+    <div id="colors" class="app-section"><h2>Выбор цвета</h2><input type="color" id="color-input" value="#f59e0b" oninput="updateColor()"><div class="output-box" id="hex-output">#F59E0B</div><div id="color-box" style="width:100%;height:100px;border-radius:15px;background:#f59e0b;"></div></div>
+    <div id="dice" class="app-section"><h2>Кубик</h2><button class="app-btn" onclick="rollDice()">Бросить</button><div class="output-box" id="dice-output" style="font-size:5rem;">🎲</div></div>
+    <div id="bmi" class="app-section"><h2>Калькулятор ИМТ</h2><input id="bmi-w" type="number" placeholder="Вес (kg)"><input id="bmi-h" type="number" placeholder="Рост (cm)"><button class="app-btn" onclick="calcBMI()">Считать</button><div class="output-box" id="bmi-out">-</div></div>
+    <div id="stopwatch" class="app-section"><h2>Секундомер</h2><div class="output-box" id="sw-out" style="font-size:4rem;">0.0s</div><button class="app-btn" onclick="startSW()">Старт</button> <button class="app-btn" onclick="stopSW()">Стоп</button> <button class="app-btn" onclick="resetSW()">Сброс</button></div>
+    <div id="quote" class="app-section"><h2>Цитаты</h2><button class="app-btn" onclick="getQuote()">Вдохнови меня</button><div class="output-box" id="quote-out" style="font-size:1.1rem; font-style:italic;">Нажми кнопку!</div></div>
+    <div id="tip" class="app-section"><h2>Чаевые</h2><input id="tip-bill" type="number" placeholder="Счет $"><input id="tip-perc" type="number" placeholder="% Чаевых"><button class="app-btn" onclick="calcTip()">Считать</button><div class="output-box" id="tip-out">-</div></div>
+    <div id="clock" class="app-section"><h2>Часы</h2><div class="output-box" id="clock-out" style="font-size:4rem;">00:00:00</div></div>
+    <div id="coin" class="app-section"><h2>Монетка</h2><button class="app-btn" onclick="flipCoin()">Бросить</button><div class="output-box" id="coin-out" style="font-size:4rem;">🪙</div></div>
+    <div id="temp" class="app-section"><h2>Температура</h2><input id="temp-in" type="number" placeholder="Градусы"><button class="app-btn" onclick="calcTemp('c')">В °C</button> <button class="app-btn" onclick="calcTemp('f')">В °F</button><div class="output-box" id="temp-out">-</div></div>
+    <div id="length" class="app-section"><h2>Длина</h2><input id="len-in" type="number" placeholder="Значение"><button class="app-btn" onclick="calcLen('cm')">В см</button> <button class="app-btn" onclick="calcLen('in')">В дюймы</button><div class="output-box" id="len-out">-</div></div>
+    <div id="weight" class="app-section"><h2>Вес</h2><input id="wgt-in" type="number" placeholder="Значение"><button class="app-btn" onclick="calcWgt('kg')">В кг</button> <button class="app-btn" onclick="calcWgt('lbs')">В фунты</button><div class="output-box" id="wgt-out">-</div></div>
+    <div id="reverse" class="app-section"><h2>Реверс текста</h2><input id="rev-in" type="text" placeholder="Текст..." oninput="revText()"><div class="output-box" id="rev-out" style="font-size:1.2rem;">-</div></div>
+    <div id="case" class="app-section"><h2>Регистр</h2><input id="case-in" type="text" placeholder="Текст..."><br><button class="app-btn" onclick="convCase('up')">ВЕРХНИЙ</button> <button class="app-btn" onclick="convCase('low')">нижний</button><div class="output-box" id="case-out" style="font-size:1.2rem;">-</div></div>
+    <div id="age" class="app-section"><h2>Возраст</h2><input id="age-in" type="date"><button class="app-btn" onclick="calcAge()">Считать</button><div class="output-box" id="age-out">-</div></div>
+    <div id="percent" class="app-section"><h2>Проценты</h2><input id="pct-1" type="number" placeholder="Какой %" style="width:35%"><input id="pct-2" type="number" placeholder="От числа" style="width:35%"><br><button class="app-btn" onclick="calcPct()">Считать</button><div class="output-box" id="pct-out">-</div></div>
+    <div id="rng" class="app-section"><h2>Случайное число</h2><input id="rng-min" type="number" placeholder="Мин" style="width:35%"><input id="rng-max" type="number" placeholder="Макс" style="width:35%"><br><button class="app-btn" onclick="calcRNG()">Выбрать</button><div class="output-box" id="rng-out" style="font-size:3rem;">-</div></div>
+    <div id="notes" class="app-section"><h2>Блокнот 💾</h2><textarea id="note-in" rows="6" placeholder="Пиши... сохраняется автоматически!" oninput="saveData()"></textarea></div>
+    <div id="day" class="app-section"><h2>День недели</h2><input id="day-in" type="date"><button class="app-btn" onclick="findDay()">Найти день</button><div class="output-box" id="day-out">-</div></div>
+    <div id="base64" class="app-section"><h2>Base64 Кодер</h2><input id="b64-in" type="text" placeholder="Текст..."><br><button class="app-btn" onclick="doB64('enc')">Код.</button> <button class="app-btn" onclick="doB64('dec')">Декод.</button><div class="output-box" id="b64-out" style="font-size:1rem;word-break:break-all;">-</div></div>
+    <div id="qr" class="app-section"><h2>QR-Код</h2><input id="qr-in" type="text" placeholder="Ссылка/Текст"><button class="app-btn" onclick="genQR('qr-in','qr-out')">Создать</button><br><img id="qr-out" style="margin-top:15px;display:none;border-radius:10px;border:3px solid white;" src="" alt="QR"></div>
+    <div id="vowels" class="app-section"><h2>Гласные буквы</h2><input id="vow-in" type="text" placeholder="Текст..." oninput="countVowels()"><div class="output-box" id="vow-out">0</div></div>
+    <div id="leap" class="app-section"><h2>Високосный год</h2><input id="leap-in" type="number" placeholder="Год"><button class="app-btn" onclick="checkLeap()">Проверить</button><div class="output-box" id="leap-out">-</div></div>
+    <div id="roman" class="app-section"><h2>Римские цифры</h2><input id="rom-in" type="number" placeholder="1-3999"><button class="app-btn" onclick="toRoman()">Перевести</button><div class="output-box" id="rom-out">-</div></div>
+    <div id="keycode" class="app-section"><h2>Код клавиши</h2><input id="key-in" type="text" placeholder="Нажми клавишу..." onkeydown="getKey(event)"><div class="output-box" id="key-out" style="font-size:3rem;">-</div></div>
+    <div id="gradient" class="app-section"><h2>Градиент</h2><input type="color" id="g-c1" value="#f59e0b" oninput="genGrad()"> <input type="color" id="g-c2" value="#059669" oninput="genGrad()"><div id="grad-box" style="height:100px;border-radius:15px;margin-top:15px;background:linear-gradient(to right,#f59e0b,#059669);"></div><div class="output-box" id="grad-out" style="font-size:1rem;">linear-gradient(...)</div></div>
+    <div id="battery" class="app-section"><h2>Батарея</h2><button class="app-btn" onclick="getBat()">Проверить</button><div class="output-box" id="bat-out">-</div></div>
+    
+    <div id="scaler" class="app-section"><h2>Масштаб рецепта</h2><input id="scl-amt" type="number" placeholder="Кол-во ингредиента" style="width:90%"><br><input id="scl-old" type="number" placeholder="Старые порции" style="width:40%"> <input id="scl-new" type="number" placeholder="Новые порции" style="width:40%"><br><button class="app-btn" onclick="scaleRecipe()">Посчитать</button><div class="output-box" id="scl-out">-</div></div>
+    <div id="cupsgrams" class="app-section"><h2>Граммы ⇄ Стаканы</h2><select id="cg-ing"><option value="120">Мука (Пшеничная)</option><option value="200">Сахар (Песок)</option><option value="227">Сливочное масло</option><option value="90">Овсянка</option></select><br><input id="cg-amt" type="number" placeholder="Кол-во (Стаканы)"><button class="app-btn" onclick="calcCG()">В граммы</button><div class="output-box" id="cg-out">-</div></div>
+    <div id="subs" class="app-section"><h2>Замены ингредиентов</h2><select id="sub-in"><option value="buttermilk">Пахта (1 стакан)</option><option value="egg">Яйцо (1 шт)</option><option value="bpowder">Разрыхлитель (1 ч.л.)</option><option value="brownsugar">Коричневый сахар (1 ст)</option></select><button class="app-btn" onclick="getSub()">Найти замену</button><div class="output-box" id="sub-out" style="font-size:1.2rem; white-space:pre-wrap;">-</div></div>
+    <div id="oven" class="app-section"><h2>Духовка (Темп.)</h2><input id="ov-in" type="number" placeholder="Температура"><button class="app-btn" onclick="calcOven('f')">°F в °C</button> <button class="app-btn" onclick="calcOven('c')">°C в °F</button><div class="output-box" id="ov-out" style="font-size:1.2rem;">-</div></div>
+    <div id="water" class="app-section"><h2>Трекер воды</h2><div class="output-box" id="wat-count" style="font-size:3rem; margin:10px;">0 / 8</div><p>Стаканов сегодня</p><button class="app-btn" style="background:#3b82f6; width:150px;" onclick="addWater()">+ Выпить 1 стакан</button><br><button class="app-btn" style="background:#64748b;" onclick="resetWater()">Сброс</button></div>
+    <div id="sleep" class="app-section"><h2>Циклы сна</h2><p>Если ляжете спать прямо сейчас, лучше проснуться в:</p><button class="app-btn" onclick="calcSleep()">Рассчитать время</button><div class="output-box" id="slp-out" style="font-size:1.2rem; line-height:1.6;">-</div></div>
+    <div id="grocery" class="app-section"><h2>Список продуктов</h2><input type="text" id="groc-in" placeholder="Яблоки, молоко..."><button class="app-btn" onclick="addGroc()">Добавить</button><ul id="groc-list"></ul></div>
+    <div id="split" class="app-section"><h2>Разделить счет</h2><input id="splt-bill" type="number" placeholder="Весь счет $"><input id="splt-ppl" type="number" placeholder="Сколько человек?"><button class="app-btn" onclick="calcSplit()">Разделить</button><div class="output-box" id="splt-out">-</div></div>
+    <div id="habit" class="app-section"><h2>Трекер привычек 💾</h2><input type="text" id="hab-in" placeholder="Напр. Читать 10 стр."><button class="app-btn" onclick="addHabit()">Добавить</button><ul id="hab-list"></ul></div>
+    <div id="expire" class="app-section"><h2>Сроки годности</h2><input type="text" id="exp-item" placeholder="Продукт"><input type="date" id="exp-date"><button class="app-btn" onclick="addExpire()">Сколько дней?</button><div class="output-box" id="exp-res" style="font-size:1.5rem;">-</div></div>
+    <div id="caffeine" class="app-section"><h2>Лимит кофеина</h2><p>Безопасная норма: 400мг/день</p><select id="caf-sel"><option value="95">Кофе (240мл) - 95мг</option><option value="30">Чай (240мл) - 30мг</option><option value="111">Энергетик (350мл) - 111мг</option><option value="34">Кола (350мл) - 34мг</option></select><button class="app-btn" onclick="addCaf()">Выпить</button><div class="output-box" style="color:#ef4444;">Итого: <span id="caf-tot">0</span> мг</div></div>
+    <div id="macros" class="app-section"><h2>Базовые макросы</h2><p>Примерный расчет на прием пищи</p><input id="mac-cal" type="number" placeholder="Калории порции (напр. 500)"><button class="app-btn" onclick="calcMac()">Оценить</button><div class="output-box" id="mac-out" style="font-size:1.1rem; line-height:1.5;">-</div></div>
+    <div id="plant" class="app-section"><h2>Полив растений</h2><input type="text" id="plt-name" placeholder="Имя растения"><input type="number" id="plt-days" placeholder="Дней между поливом"><button class="app-btn" onclick="addPlant()">Записать</button><ul id="plt-list"></ul></div>
+    <div id="read" class="app-section"><h2>Время на чтение</h2><p>Ср. скорость: 250 слов/мин</p><input id="rd-pgs" type="number" placeholder="Кол-во страниц"><input id="rd-wp" type="number" placeholder="Слов на странице (~300)"><button class="app-btn" onclick="calcRead()">Рассчитать</button><div class="output-box" id="rd-out">-</div></div>
+    <div id="hiit" class="app-section"><h2>Тренировка HIIT</h2><p>45с РАБОТА / 15с ОТДЫХ</p><div class="output-box" id="hiit-disp" style="font-size:4rem;">00:00</div><h3 id="hiit-phase" style="color:#10b981;">ГОТОВ</h3><button class="app-btn" onclick="startHIIT()">Старт</button> <button class="app-btn" style="background:#ef4444;" onclick="stopHIIT()">Стоп</button></div>
+    <div id="portion" class="app-section"><h2>Порции макарон</h2><input id="pas-ppl" type="number" placeholder="Кол-во человек"><button class="app-btn" onclick="calcPasta()">Рассчитать</button><div class="output-box" id="pas-out" style="font-size:1.2rem;">-</div></div>
+
+    <div id="discount" class="app-section"><h2>Калькулятор скидок</h2><input type="number" id="dsc-p" placeholder="Начальная цена"><input type="number" id="dsc-d" placeholder="Скидка (%)"><button class="app-btn" onclick="calcDisc()">Посчитать</button><div class="output-box" id="dsc-out" style="font-size:1.2rem;">-</div></div>
+    <div id="fuel" class="app-section"><h2>Стоимость поездки</h2><input type="number" id="fl-d" placeholder="Расстояние (км)"><input type="number" id="fl-c" placeholder="Расход (л / 100 км)"><input type="number" id="fl-p" placeholder="Цена за литр (₽)"><button class="app-btn" onclick="calcFuel()">Посчитать</button><div class="output-box" id="fl-out" style="font-size:1.2rem;">-</div></div>
+    <div id="loan" class="app-section"><h2>Платеж по кредиту</h2><input type="number" id="ln-s" placeholder="Сумма кредита"><input type="number" id="ln-r" placeholder="Ставка (% годовых)"><input type="number" id="ln-m" placeholder="Срок (в месяцах)"><button class="app-btn" onclick="calcLoan()">Посчитать</button><div class="output-box" id="ln-out" style="font-size:1.5rem;">-</div></div>
+    <div id="dates" class="app-section"><h2>Дни между датами</h2><input type="date" id="dt-1"><input type="date" id="dt-2"><button class="app-btn" onclick="calcDates()">Узнать дни</button><div class="output-box" id="dt-out" style="font-size:2rem;">-</div></div>
+    <div id="sizes" class="app-section"><h2>Размеры одежды</h2><select id="sz-in"><option value="XS">XS (Очень маленький)</option><option value="S">S (Маленький)</option><option value="M">M (Средний)</option><option value="L">L (Большой)</option><option value="XL">XL (Очень большой)</option></select><button class="app-btn" onclick="getSizes()">Показать</button><div class="output-box" id="sz-out" style="font-size:1.2rem;">-</div></div>
+    <div id="speak" class="app-section"><h2>Озвучка текста</h2><textarea id="spk-in" rows="4" placeholder="Напиши что-нибудь..."></textarea><button class="app-btn" onclick="speakText()">Прочитать вслух 📢</button></div>
+    <div id="burn" class="app-section"><h2>Сжигание калорий</h2><input type="number" id="brn-w" placeholder="Ваш вес (кг)"><select id="brn-a"><option value="3.5">Ходьба</option><option value="8">Бег</option><option value="6">Велосипед</option></select><input type="number" id="brn-t" placeholder="Время (минуты)"><button class="app-btn" onclick="calcBurn()">Посчитать</button><div class="output-box" id="brn-out" style="font-size:2rem;">-</div></div>
+    <div id="wifi" class="app-section"><h2>Поделиться WiFi</h2><input type="text" id="wf-s" placeholder="Название сети (SSID)"><input type="text" id="wf-p" placeholder="Пароль"><button class="app-btn" onclick="genWiFi()">Создать QR-код</button><br><img id="wf-out" style="margin-top:15px;display:none;border-radius:10px;border:3px solid white;" src="" alt="WiFi QR"></div>
+    <div id="vat" class="app-section"><h2>Калькулятор НДС (20%)</h2><input type="number" id="vat-in" placeholder="Сумма (₽)"><button class="app-btn" onclick="calcVAT(true)">Добавить 20% сверху</button> <button class="app-btn" onclick="calcVAT(false)">Выделить из суммы</button><div class="output-box" id="vat-out" style="font-size:1.2rem;">-</div></div>
+    <div id="mathq" class="app-section"><h2>Устный счет</h2><h3 id="mq-q" style="font-size:2rem; margin:10px;">?</h3><input type="number" id="mq-in" placeholder="Ответ"><button class="app-btn" onclick="checkMath()">Ответить</button><button class="app-btn" style="background:#3b82f6;" onclick="newMath()">Следующий</button><div class="output-box" id="mq-out">-</div></div>
+
+    <div class="filters">
+        <button class="filter-btn active-filter" onclick="filterCat('all', this)">🌟 Все</button>
+        <button class="filter-btn" onclick="filterCat('utils', this)">🛠 Утилиты</button>
+        <button class="filter-btn" onclick="filterCat('kitchen', this)">🍳 Кухня</button>
+        <button class="filter-btn" onclick="filterCat('life', this)">🏠 Быт</button>
     </div>
 
-    <div id="view-catalog" class="container active">
-        <div class="movie-grid" id="catalogGrid"></div>
-    </div>
+    <div class="tabs" id="tab-container">
+        <button data-cat="utils" class="active-tool" onclick="showApp('pomodoro', this)">⏱️ Таймер</button>
+        <button data-cat="utils" onclick="showApp('todo', this)">📝 Задачи</button>
+        <button data-cat="utils" onclick="showApp('breathe', this)">🧘 Дыхание</button>
+        <button data-cat="utils" onclick="showApp('reaction', this)">⚡ Реакция</button>
+        <button data-cat="utils" onclick="showApp('physics', this)">🎾 Физика</button>
+        <button data-cat="utils" onclick="showApp('password', this)">🔐 Пароли</button>
+        <button data-cat="utils" onclick="showApp('expense', this)">💰 Расходы</button>
+        <button data-cat="utils" onclick="showApp('words', this)">🔤 Слова</button>
+        <button data-cat="utils" onclick="showApp('colors', this)">🎨 Цвета</button>
+        <button data-cat="utils" onclick="showApp('dice', this)">🎲 Кубики</button>
+        <button data-cat="utils" onclick="showApp('bmi', this)">⚖️ ИМТ</button>
+        <button data-cat="utils" onclick="showApp('stopwatch', this)">⏱️ Секундомер</button>
+        <button data-cat="utils" onclick="showApp('quote', this)">💬 Цитаты</button>
+        <button data-cat="utils" onclick="showApp('tip', this)">💵 Чаевые</button>
+        <button data-cat="utils" onclick="showApp('clock', this)">🕰️ Часы</button>
+        <button data-cat="utils" onclick="showApp('coin', this)">🪙 Монетка</button>
+        <button data-cat="utils" onclick="showApp('temp', this)">🌡️ Температура</button>
+        <button data-cat="utils" onclick="showApp('length', this)">📏 Длина</button>
+        <button data-cat="utils" onclick="showApp('weight', this)">🏋️ Вес</button>
+        <button data-cat="utils" onclick="showApp('reverse', this)">🔄 Реверс</button>
+        <button data-cat="utils" onclick="showApp('case', this)">Aa Регистр</button>
+        <button data-cat="utils" onclick="showApp('age', this)">🎂 Возраст</button>
+        <button data-cat="utils" onclick="showApp('percent', this)">📊 Проценты</button>
+        <button data-cat="utils" onclick="showApp('rng', this)">🔢 Случайное</button>
+        <button data-cat="utils" onclick="showApp('notes', this)">🗒️ Заметки</button>
+        <button data-cat="utils" onclick="showApp('day', this)">📅 День</button>
+        <button data-cat="utils" onclick="showApp('base64', this)">🔒 Base64</button>
+        <button data-cat="utils" onclick="showApp('qr', this)">📱 QR-код</button>
+        <button data-cat="utils" onclick="showApp('vowels', this)">🅰️ Гласные</button>
+        <button data-cat="utils" onclick="showApp('leap', this)">🐸 Високосный</button>
+        <button data-cat="utils" onclick="showApp('roman', this)">🏛️ Римские</button>
+        <button data-cat="utils" onclick="showApp('keycode', this)">⌨️ Код клавиши</button>
+        <button data-cat="utils" onclick="showApp('gradient', this)">🌈 Градиент</button>
+        <button data-cat="utils" onclick="showApp('battery', this)">🔋 Батарея</button>
 
-    <div id="view-library" class="container">
-        <h2 style="margin-top:0;">Your Saved Collection</h2>
-        <div class="movie-grid" id="libraryGrid"></div>
-    </div>
+        <button data-cat="kitchen" onclick="showApp('scaler', this)">⚖️ Порции</button>
+        <button data-cat="kitchen" onclick="showApp('cupsgrams', this)">🥣 В Граммы</button>
+        <button data-cat="kitchen" onclick="showApp('subs', this)">🔄 Замены</button>
+        <button data-cat="kitchen" onclick="showApp('oven', this)">🔥 Духовка</button>
+        <button data-cat="kitchen" onclick="showApp('water', this)">💧 Вода</button>
+        <button data-cat="kitchen" onclick="showApp('sleep', this)">🛌 Сон</button>
+        <button data-cat="kitchen" onclick="showApp('grocery', this)">🛒 Продукты</button>
+        <button data-cat="kitchen" onclick="showApp('split', this)">🍕 Счет</button>
+        <button data-cat="kitchen" onclick="showApp('habit', this)">✅ Привычки</button>
+        <button data-cat="kitchen" onclick="showApp('expire', this)">🥛 Годность</button>
+        <button data-cat="kitchen" onclick="showApp('caffeine', this)">☕ Кофеин</button>
+        <button data-cat="kitchen" onclick="showApp('macros', this)">🥩 Макросы</button>
+        <button data-cat="kitchen" onclick="showApp('plant', this)">🌱 Растения</button>
+        <button data-cat="kitchen" onclick="showApp('read', this)">📚 Чтение</button>
+        <button data-cat="kitchen" onclick="showApp('hiit', this)">🏃 Тренировка</button>
+        <button data-cat="kitchen" onclick="showApp('portion', this)">🍽️ Макароны</button>
 
-    <div id="view-add" class="container">
-        <div class="box-panel">
-            <div class="top-instructions">
-                <b>Instruction:</b> First go to web Kinogo, after choose film and copy image and copy film link, after set it in inputs.<br>
-                Thanks For Reading!<br>
-                <a href="https://kinogo.ec" target="_blank">🔗 Go to Kinogo Website</a>
-            </div>
-            <h2 style="margin: 0; text-align: center;">Upload to Database</h2>
-            <input type="text" id="newTitle" placeholder="Movie Title" required>
-            <input type="text" id="newGenre" placeholder="Genre (e.g., Action, Horror)" required>
-            <input type="text" id="newImg" placeholder="Image URL (optional)">
-            <input type="text" id="newWatchUrl" placeholder="Watch/Stream Link (optional)">
-            <button onclick="addCustomMovie()">Add Movie to Site</button>
-        </div>
+        <button data-cat="life" onclick="showApp('discount', this)">🛍️ Скидки</button>
+        <button data-cat="life" onclick="showApp('fuel', this)">🚗 Топливо</button>
+        <button data-cat="life" onclick="showApp('loan', this)">💳 Кредит</button>
+        <button data-cat="life" onclick="showApp('dates', this)">📅 Календ. дни</button>
+        <button data-cat="life" onclick="showApp('sizes', this)">👕 Размеры</button>
+        <button data-cat="life" onclick="showApp('speak', this)">🗣️ Озвучка</button>
+        <button data-cat="life" onclick="showApp('burn', this)">🔥 Калории</button>
+        <button data-cat="life" onclick="showApp('wifi', this)">📶 WiFi QR</button>
+        <button data-cat="life" onclick="showApp('vat', this)">🧾 НДС</button>
+        <button data-cat="life" onclick="showApp('mathq', this)">🧠 Устный счет</button>
     </div>
-
-    <div id="view-redeem" class="container">
-        <div class="box-panel">
-            <h2 style="margin: 0; text-align: center; color: var(--gold);">Redeem Promo Code</h2>
-            <p style="margin: 0; font-size: 14px; text-align: center; color: #8f98a0;">
-                Enter a code below to unlock exclusive Gold Premium movies!
-            </p>
-            <input type="text" id="promoInput" placeholder="Enter Code Here">
-            <button class="btn-gold" onclick="redeemPromoCode()">Redeem Promo</button>
-        </div>
-    </div>
-
-    <div id="notification-toast">Message</div>
 
     <script>
-        // --- STORAGE CONSTANTS & LOGIC ---
-        const MAX_STORAGE_MB = 10 * 1024; // 10 GB in Megabytes
-
-        function getPersistentSizeMB(id) {
-            const min = 50;
-            const max = 400;
-            const hash = (id * 9301 + 49297) % 233280;
-            return Math.floor((hash / 233280) * (max - min + 1)) + min;
+        const get = id => document.getElementById(id);
+        
+        // --- 1. АУДИО И ТЕМЫ ---
+        function playPop() {
+            try {
+                let ctx = new (window.AudioContext || window.webkitAudioContext)();
+                let osc = ctx.createOscillator(); let gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.type = 'sine'; osc.frequency.setValueAtTime(800, ctx.currentTime);
+                gain.gain.setValueAtTime(0.05, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+                osc.start(); osc.stop(ctx.currentTime + 0.1);
+            } catch(e){}
         }
 
-        // Logic applied: Premium movies are strictly kept between 30 and 50 MB
-        const availableCodes = {
-            // New Promo Codes Added:
-            "FIGHT": { id: 907, title: "Форсаж 6", genre: "Action/Drama/Thriller", img: "https://kinogo.ec/uploads/mini/minifull/d89/1585433622-943023901.webp", watchUrl: "https://kinogo.ec/20045--forsazh-6-hd.html", isPremium: true, sizeMB: 44 },
-            "HISTORY": { id: 908, title: "Гладиатор", genre: "History", img: "https://kinogo.ec/uploads/mini/minifull/d8d/1585435438-318992354.webp", watchUrl: "https://kinogo.ec/20308--gladiator.html", isPremium: true, sizeMB: 48 },
-            "HELL": { id: 909, title: "Адвокат дьявола", genre: "Drama/Fantasy", img: "https://kinogo.ec/uploads/mini/minifull/972/1585417102-666391654.webp", watchUrl: "https://kinogo.ec/17961--advokat-djavola.html", isPreium: true, sizeMB: 39 },
-            "2020": { id: 910, title: "Соник в кино", genre: "Fantasy", img: "https://kinogo.ec/uploads/mini/minifull/53f/1731250049-sonik-v-kino.webp", watchUrl: "https://kinogo.ec/36179--sonik-v-kino-2020.html", isPremium: true, sizeMB: 33 },
-            "KINOGO": { id: 901, title: "Веном", genre: "Action", img: "https://kinogo.ec/uploads/mini/minifull/70b/1585435638-73139975.webp", watchUrl: "https://kinogo.ec/20339--venom-2018-hd-m1.html", isPremium: true, sizeMB: 45 },
-            "MOVIE": { id: 902, title: "Пираты Карибского моря", genre: "Action", img: "https://kinogo.ec/uploads/mini/minifull/85e/1585474038-1801432619.webp", watchUrl: "https://kinogo.ec/21792-piraty-karibskogo-morya-proklyatie-chernoj-zhemchuzhiny-hd.html", isPremium: true, sizeMB: 38 },
-            "GAME": { id: 903, title: "Одни из нас (1-2 сезон)", genre: "Action", img: "https://kinogo.ec/uploads/mini/minifull/11b/1747082609_odni-iz-nas.webp", watchUrl: "https://kinogo.ec/55634--odni-iz-nas.html", isPremium: true, sizeMB: 42 },
-            "HEART": { id: 904, title: "Холодное сердце", genre: "Cartoon", img: "https://kinogo.ec/uploads/mini/minifull/cec/1585361212-562465080.webp", watchUrl: "https://kinogo.ec/10902--holodnoe-serdce-h1.html", isPremium: true, sizeMB: 32 },
-            "ACTION": { id: 905, title: "Неоспоримый 4", genre: "Action", img: "https://kinogo.ec/uploads/mini/minifull/8c0/1585405222-837425183.webp", watchUrl: "https://kinogo.ec/16255--neosporimyj-4.html", isPremium: true, sizeMB: 49 },
-            "HEARTING": { id: 906, title: "Драмарама", genre: "Drama", img: "https://kinogo.ec/uploads/mini/minifull/f2f/1639815579-716694556.webp", watchUrl: "https://kinogo.ec/53511-dramarama.html", isPremium: true, sizeMB: 35 },
-            "HEARING": { id: 906, title: "Слушать в отсеках", genre: "Drama", img: "https://kinogo.ec/uploads/mini/minifull/711/1704989292-1171762850.webp", watchUrl: "https://kinogo.ec/92814--slushat-v-otsekah.html", isPremium: true, sizeMB: 50 },
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            localStorage.setItem('appTheme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+        }
+        if(localStorage.getItem('appTheme') === 'light') document.body.classList.add('light-theme');
 
-            
+        // --- 2. СОХРАНЕНИЕ ДАННЫХ (LOCAL STORAGE) ---
+        let expTotalVar = 0;
+        function saveData() {
+            localStorage.setItem('myNote', get('note-in').value);
+            localStorage.setItem('todoData', get('todo-list').innerHTML);
+            localStorage.setItem('habData', get('hab-list').innerHTML);
+            localStorage.setItem('expData', get('expense-list').innerHTML);
+            localStorage.setItem('expTot', expTotalVar);
+        }
+        function loadData() {
+            if(localStorage.getItem('myNote')) get('note-in').value = localStorage.getItem('myNote');
+            if(localStorage.getItem('todoData')) get('todo-list').innerHTML = localStorage.getItem('todoData');
+            if(localStorage.getItem('habData')) get('hab-list').innerHTML = localStorage.getItem('habData');
+            if(localStorage.getItem('expData')) {
+                get('expense-list').innerHTML = localStorage.getItem('expData');
+                expTotalVar = parseFloat(localStorage.getItem('expTot')) || 0;
+                get('exp-total').innerText = expTotalVar.toFixed(2);
+            }
+        }
+        
+        // --- 3. ИНТЕРФЕЙС И ВЫВОД ---
+        const out = (id, val) => {
+            let el = get(id);
+            if(el) { el.innerHTML = val; el.classList.remove('pop-anim'); void el.offsetWidth; el.classList.add('pop-anim'); }
         };
-
-        const rawMovies = [
-            { id: 1, title: "майкл",
-             genre: "History/Drama", 
-             img: "https://m.media-amazon.com/images/M/MV5BNzllNmRlN2EtMDQyOC00ODJjLTg4OWQtZDNmNGU3YzlkNjc1XkEyXkFqcGc@._V1_.jpg", watchUrl: "https://kinogo.no/54464-maykl-ah2.html" },
-            { id: 2, title: "Закулисье",
-             genre: "Horror/action",
-              img: "https://upload.wikimedia.org/wikipedia/en/3/3d/Backrooms_%28film%29_poster.jpg", watchUrl: "https://kinogo.ec/126065-zakulise-realnosti.html" },
-            { id: 3, title: "пять ночей фреди 2",
-             genre: "Horror",
-              img: "https://m.media-amazon.com/images/M/MV5BZmQ3NmIxNTgtYjFiNS00NzliLWI0YzAtZDkxY2E0YWIxZDEwXkEyXkFqcGc@._V1_.jpg", watchUrl: "https://kinogo.ec/122695--pjat-nochej-s-freddi-2.html" },
-            { id: 4, title: "вивариум",
-             genre: "Action/Horror",
-              img: "https://m.media-amazon.com/images/M/MV5BZjdlZmRmOTUtN2IxZi00ZmY2LWE5MWMtOTYxNTkyNzA3ZGFjXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
-               watchUrl: "https://kinogo.ec/37141--vivarium.html" },
-            { id: 5, title: "мондолорец  и грогу",
-             genre: "Action",
-              img: "https://kinogo.ec/uploads/mini/minifull/ff0/1772574584-mandalorec-i-grogu-poster.webp",
-               watchUrl: "https://kinogo.ec/125434-mandalorec-i-grogu.html" },
-            { id: 6, title: "очень страшное кино 6",
-             genre: "Horror",
-              img: "https://kinogo.ec/uploads/mini/minifull/ec5/1781809660_ochen-strashnoe-kino-6.webp",
-               watchUrl: "https://kinogo.ec/125435-ochen-strashnoe-kino-6.html" },
-            { id: 7, title: "твое сердце будет разбито",
-             genre: "Drama",
-              img: "https://kinogo.ec/uploads/mini/minifull/a2a/1774789222-tvoe-serdce-budet-razbito-poster.webp",
-               watchUrl: "https://kinogo.ec/125999-tvoe-serdce-budet-razbito.html" },
-            { id: 8, title: "колоня", 
-            genre: "Horror/Action",
-             img: "https://kinogo.ec/uploads/mini/minifull/6d7/1774353620-kolonija-poster.webp",
-              watchUrl: "https://kinogo.ec/125951-kolonija.html" },
-            { id: 9, title: "Миньоны и монстры",
-             genre: "Cartoon", img: "https://kinogo.ec/uploads/mini/minifull/dff/1770890423-minony-i-monstry-poster.webp",
-              watchUrl: "https://kinogo.ec/124957-minony-i-monstry.html" },
-            { id: 10, title: "ночной бизнес",
-             genre: "Action/Thriller", img: "https://kinogo.ec/uploads/mini/minifull/898/1782345604-nochnoj-biznes.webp",
-              watchUrl: "https://kinogo.ec/126815-nochnoj-biznes.html" },
-            { id: 11, title: "Сообщения для Изабель",
-             genre: "Drama", img: "https://kinogo.ec/uploads/mini/minifull/83e/1781965778_soobschenija-dlja-izabel.webp",
-              watchUrl: "https://kinogo.ec/126781-soobschenija-dlja-izabel.html" },
-            { id: 12, title: "Следствие ведут овечки",
-             genre: "Fantasy/Detective", 
-             img: "https://kinogo.ec/uploads/mini/minifull/05e/1768928464_the-sheep-detectives.webp", 
-             watchUrl: "https://kinogo.ec/124339-sledstvie-vedut-ovechki.html" },
-            { id: 13, title: "Властелины вселенной ",
-             genre: "Fantasy", img: "https://kinogo.ec/uploads/mini/minifull/90e/1780595561_vlasteliny-vselennoi.webp",
-              watchUrl: "https://kinogo.ec/124709-vlasteliny-vselennoj.html" },
-            { id: 14, title: "Каратель: Последнее убийство",
-             genre: "Thriller/Action/Drama", img: "https://kinogo.ec/uploads/mini/minifull/809/1778773677_the-punisher-one-last-kill.webp", 
-             watchUrl: "https://kinogo.ec/126432-karatel-poslednee-ubijstvo.html" },
-            { id: 15, title: "Давление",
-             genre: "Thriller/Drama/Army",
-              img: "https://kinogo.ec/uploads/mini/minifull/fd1/1772574491-davlenie-poster.webp",
-               watchUrl: "https://kinogo.ec/125431-davlenie.html" },
-            { id: 16, title: "Семь вёрст до рассвета",
-             genre: "History/Drama",
-              img: "https://kinogo.ec/uploads/mini/minifull/48b/1773039839-sem-verst-do-rassveta-poster.webp",
-               watchUrl: "https://kinogo.ec/125744-sem-verst-do-rassveta.html" },
-            { id: 17, title: "Зловещие мертвецы: Пекло",
-             genre: "Horror", img: "https://kinogo.ec/uploads/mini/minifull/1a1/1779449582-zloveschie-mertvecy-peklo.webp",
-              watchUrl: "https://kinogo.ec/126485-zloveschie-mertvecy-peklo.html" },
-            { id: 18, title: "Моана", 
-            genre: "Fantasy/Musicl/Action", 
-            img: "https://kinogo.ec/uploads/mini/minifull/395/1775059246-moana-poster.webp", 
-            watchUrl: "https://kinogo.ec/126044-moana.html" },
-             { id: 19, title: "Коммерсант", 
-            genre: "Drama", 
-            img: "https://kinogo.ec/uploads/mini/minifull/ca2/1772967864-kommersant-poster.webp", 
-            watchUrl: "https://kinogo.ec/125718-kommersant.html" },
-            { id: 20, title: "Обсессия", 
-            genre: "Horror", 
-            img: "https://kinogo.ec/uploads/mini/minifull/cd8/1781809532_obsessija.webp", 
-            watchUrl: "https://kinogo.ec/125740-obsessija.html" },
-            { id: 21, title: "Глубокие воды", 
-            genre: "Horror/Action/Thriller", 
-            img: "https://kinogo.ec/uploads/mini/minifull/3cc/1777746593_glubokie-vody.webp", 
-            watchUrl: "https://kinogo.ec/126343-glubokie-vody.html" },
-            { id: 22, title: "Живая ярость", 
-            genre: "Criminal/Action", 
-            img: "https://kinogo.ec/uploads/mini/minifull/f7f/1781215204-zhivaja-jarost.webp", 
-            watchUrl: "https://kinogo.ec/126707-zhivaja-jarost.html" },
-            { id: 23, title: "Человек-паук: Возвращение домой", 
-            genre: "Fantastic/Action", 
-            img: "https://kinogo.ec/uploads/mini/minifull/b13/1585378274-2129618412.webp", 
-            watchUrl: "https://kinogo.ec/12493--chelovek-pauk-vozvraschenie-domoj-2017.html" },
-            { id: 24, title: "Волк с Уолл-стрит", 
-            genre: "Drama", 
-            img: "https://kinogo.ec/uploads/mini/minifull/06e/1585520399-1652496278.webp", 
-            watchUrl: "https://kinogo.ec/26906--volk-s-uoll-strit-2013.html" },
-            { id: 25, title: "Троя", 
-            genre: "Action", 
-            img: "https://kinogo.ec/uploads/mini/minifull/57c/1731237766-troja.webp", 
-            watchUrl: "https://kinogo.ec/30065--troya.html" },
-            { id: 26, title: "Человек-паук: Нет пути домой", 
-            genre: "Action", 
-            img: "https://kinogo.ec/uploads/mini/minifull/97d/1639561374-1002004435.webp", 
-            watchUrl: "https://kinogo.ec/53495-chelovek-pauk-net-puti-domoi-2021.html" },
-            { id: 27, title: "Мстители: Финал", 
-            genre: "Action", 
-            img: "https://kinogo.ec/uploads/mini/minifull/644/1585414286-1933961545.webp", 
-            watchUrl: "https://kinogo.ec/17554--mstiteli-final-2019-l4.html" },
-            { id: 28, title: "Легенда об Аанге: Последний маг воздуха", 
-            genre: "Action", 
-            img: "https://kinogo.ec/uploads/mini/minifull/e90/1776277086_legenda-ob-aange-poslednii-mag-vozduha.webp", 
-            watchUrl: "https://kinogo.ec/126192-legenda-ob-aange-poslednij-mag-vozduha.html" },
-            { id: 29, title: "Невидимая сторона", 
-            genre: "Drama", 
-            img: "https://kinogo.ec/uploads/mini/minifull/570/1585707244-233237917.webp", 
-            watchUrl: "https://kinogo.ec/30426--nevidimaja-storona.html" },
-            { id: 30, title: "Новый Человек-паук", 
-            genre: "Action", 
-            img: "https://kinogo.ec/uploads/mini/minifull/ed0/1585442715-1700703682.webp", 
-            watchUrl: "https://kinogo.ec/21361--novyj-chelovek-pauk-2012-2.html" },
-            { id: 31, title: "Мстители ", 
-            genre: "Action/Fantasy", 
-            img: "https://kinogo.ec/uploads/mini/minifull/aae/1731237506-mstiteli.webp", 
-            watchUrl: "https://kinogo.ec/29381--mstiteli.html" },
-            { id: 32, title: "Тачки", 
-            genre: "Cartoon", 
-            img: "https://kinogo.ec/uploads/mini/minifull/b3d/1585363209-143639236.webp", 
-            watchUrl: "https://kinogo.ec/11209--tachki.html" },
-            { id: 33, title: "Железный человек ", 
-            genre: "Action", 
-            img: "https://kinogo.ec/uploads/mini/minifull/fa6/1730819172-zheleznyj-chelovek.webp", 
-            watchUrl: "https://kinogo.ec/12788--zheleznyi-chelovek.html" },
-            { id: 34, title: "Я ругаюсь", 
-            genre: "Drama/History", 
-            img: "https://kinogo.ec/uploads/mini/minifull/eec/1764485704_ja-rugajus-2025.webp", 
-            watchUrl: "https://kinogo.ec/123758--ja-rugajus.html" },
-            { id: 35, title: "Человек-паук: Вдали от дома", 
-            genre: "Action", 
-            img: "https://kinogo.ec/uploads/mini/minifull/9b1/1731249039-chelovek-pauk-vdali-ot-doma.webp", 
-            watchUrl: "https://kinogo.ec/22371--chelovek-pauk-vdali-ot-doma-c1.html" },
-            { id: 36, title: "Человек-паук", 
-            genre: "Action", 
-            img: "https://kinogo.ec/uploads/mini/minifull/49b/1730819027-chelovek-pauk.webp", 
-            watchUrl: "https://kinogo.ec/12365--chelovek-pauk.html" },
-            { id: 37, title: "Диктатор", 
-            genre: "Fantasy", 
-            img: "https://kinogo.ec/uploads/mini/minifull/321/1585410316-251825477.webp", 
-            watchUrl: "https://kinogo.ec/17027--diktator.html" },
-            { id: 38, title: "Гадкий я 3", 
-            genre: "Cartoon", 
-            img: "https://kinogo.ec/uploads/mini/minifull/87a/1585362767-1907456495.webp", 
-            watchUrl: "https://kinogo.ec/11152-gadkij-ja-3.html" },
-            { id: 39, title: "Люси", 
-            genre: "Action/Fantasy", 
-            img: "https://kinogo.ec/uploads/mini/minifull/d36/1585514032-1731899099.webp", 
-            watchUrl: "https://kinogo.ec/26175--ljusi.html" },
-            { id: 40, title: "Человек-паук 3: Враг в отражении", 
-            genre: "Action", 
-            img: "https://kinogo.ec/uploads/mini/minifull/606/1585699775-2091626533.webp", 
-            watchUrl: "https://kinogo.ec/30044--chelovek-pauk-3-vrag-v-otrazhenii-2007-1.html" },
-            { id: 41, title: "Мортал Комбат", 
-            genre: "Action", 
-            img: "https://kinogo.ec/uploads/mini/minifull/1db/1731250088-mortal-kombat.webp", 
-            watchUrl: "https://kinogo.ec/37857--mortal-kombat-2021-m3.html" },
-            { id: 42, title: "Мортал Комбат 2", 
-            genre: "Action", 
-            img: "https://kinogo.ec/uploads/mini/minifull/4f5/1753002049-mortal-kombat-2-poster.webp", 
-            watchUrl: "https://kinogo.ec/121420--mortal-kombat-2.html" },
-            { id: 43, title: "Смертельная битва", 
-            genre: "Action", 
-            img: "https://kinogo.ec/uploads/mini/minifull/9ad/1585392065-951689330.webp", 
-            watchUrl: "https://kinogo.ec/14433--smertelnaja-bitva-1995.html" },
-            { id: 44, title: "Смертельная битва 2: Истребление", 
-            genre: "Action", 
-            img: "https://kinogo.ec/uploads/mini/minifull/27e/1585693198-561344501.webp", 
-            watchUrl: "https://kinogo.ec/29429--smertelnaja-bitva-2-istreblenie.html" },
-            { id: 45, title: "Легенды «Смертельной битвы»: Битва королевств", 
-            genre: "Action", 
-            img: "https://kinogo.ec/uploads/mini/minifull/154/1732370604-legendy-smertelnoj-bitvy-bitva-korolevstv.webp", 
-            watchUrl: "https://kinogo.ec/52923-legendy-smertelnoj-bitvy-bitva-korolevstv.html" },
-             { id: 46, title: "Грешники",
-            genre: "Horror", 
-            img: "https://kinogo.ec/uploads/mini/minifull/556/1744905705-1746921318.webp", 
-            watchUrl: "https://kinogo.ec/119310--greshniki.html" },
-            { id: 47, title: "Оно",
-            genre: "Horror", 
-            img: "https://kinogo.ec/uploads/mini/minifull/c8a/1585432557-1115488752.webp", 
-            watchUrl: "https://kinogo.ec/19895--ono.html" },
-            { id: 48, title: "Я иду искать 2: Вот и я",
-            genre: "Horror", 
-            img: "https://kinogo.ec/uploads/mini/minifull/48f/1769335323-ja-idu-iskat-2-vot-i-ja-poster.webp", 
-            watchUrl: "https://kinogo.ec/124708-ja-idu-iskat-2-vot-i-ja.html" },
-            { id: 49, title: "Мумия",
-            genre: "Horror", 
-            img: "https://kinogo.ec/uploads/mini/minifull/816/1776373210-mumija-poster.webp", 
-            watchUrl: "https://kinogo.ec/126220-mumija.html" },
-            { id: 50, title: "Поворот не туда",
-            genre: "Horror", 
-            img: "https://kinogo.ec/uploads/mini/minifull/862/1731342337-povorot-ne-tuda.webp", 
-            watchUrl: "https://kinogo.ec/28514-povorot-ne-tuda.html" },
-            { id: 51, title: "Восстание зловещих мертвецов",
-            genre: "Horror", 
-            img: "https://kinogo.ec/uploads/mini/minifull/41b/1731252051-vosstanie-zloveschih-mertvecov.webp", 
-            watchUrl: "https://kinogo.ec/56200--vosstanie-zloveschih-mertvecov.html" },
-            { id: 52, title: "Крик 7 ",
-            genre: "Horror", 
-            img: "https://kinogo.ec/uploads/mini/minifull/319/1769335568-krik-7-poster.webp", 
-            watchUrl: "https://kinogo.ec/124717-krik-7.html" },
-            { id: 53, title: "Железный человек 3",
-            genre: "Fantasy/Action", 
-            img: "https://kinogo.ec/uploads/mini/minifull/843/1585432806-94289729.webp", 
-            watchUrl: "https://kinogo.ec/19935-zheleznyj-chelovek-3.html" },
-            { id: 54, title: "Паук ",
-            genre: "Action/Thriller", 
-            img: "https://kinogo.ec/uploads/mini/minifull/816/1616528709-634041989.webp", 
-            watchUrl: "https://kinogo.ec/48117--pauk.html" },
-            { id: 55, title: "Супергёрл ",
-            genre: "Action/Fantasy", 
-            img: "https://kinogo.ec/uploads/mini/minifull/ea2/1782345604-supergerl.webp", 
-            watchUrl: "https://kinogo.ec/126816-supergerl.html" },
-            { id: 56, title: "Терминатор",
-            genre: "Action", 
-            img: "https://kinogo.ec/uploads/mini/minifull/ffd/1731255931-terminator.webp", 
-            watchUrl: "https://kinogo.ec/14042--terminator-1984.html" },
-            { id: 57, title: "Терминатор: Генезис",
-            genre: "Fantasy/Action", 
-            img: "https://kinogo.ec/uploads/mini/minifull/7ad/1585488609-718760896.webp", 
-            watchUrl: "https://kinogo.ec/23835--terminator-genezis.html" },
-            { id: 58, title: "Терминатор 2: Судный день",
-            genre: "Action/Fantasy", 
-            img: "https://kinogo.ec/uploads/mini/minifull/623/1731165544-terminator-2-sudnyj-den.webp", 
-            watchUrl: "https://kinogo.ec/20789-terminator-2-sudnyj-den-1991-4.html" },
-            { id: 59, title: "Тайна Коко ",
-            genre: "Cartoon", 
-            img: "https://kinogo.ec/uploads/mini/minifull/0e2/1730817952-tajna-koko.webp", 
-            watchUrl: "https://kinogo.ec/10907--tajna-koko.html" },
-            { id: 60, title: "Миньоны: Грювитация",
-            genre: "Cartoon", 
-            img: "https://kinogo.ec/uploads/mini/minifull/1c9/1731428005-minony-grjuvitacija.webp", 
-            watchUrl: "https://kinogo.ec/54526-minony-grjuvitacija.html" },
-            { id: 61, title: "Матрица ",
-            genre: "Action/Fantasy", 
-            img: "https://kinogo.ec/uploads/mini/minifull/0ba/1585419843-1334891298.webp", 
-            watchUrl: "https://kinogo.ec/18337--matrica.html" },
-            { id: 62, title: "Матрица: Революция",
-            genre: "Action/Fantasy", 
-            img: "https://kinogo.ec/uploads/mini/minifull/7ef/1585376253-386700288.webp", 
-            watchUrl: "https://kinogo.ec/12228--matrica-revoluciya-2003.html" },
-            { id: 63, title: "Матрица: Перезагрузка",
-            genre: "Action/Fantasy", 
-            img: "https://kinogo.ec/uploads/mini/minifull/f6c/1585495830-1020442604.webp", 
-            watchUrl: "https://kinogo.ec/24797--matrica-perezagruzka.html" },
-            { id: 64, title: "Матрица 4: Воскрешение",
-            genre: "Action/Fantasy", 
-            img: "https://kinogo.ec/uploads/mini/minifull/1a1/1744649734-poster.webp", 
-            watchUrl: "https://kinogo.ec/52975--matrica-voskreshenie-2021-hd.html" },
-            { id: 65, title: "Выход 8",
-            genre: "Horror/Fantasy", 
-            img: "https://kinogo.ec/uploads/mini/minifull/3d5/1755794044-poster.webp", 
-            watchUrl: "https://kinogo.ec/119576--vyhod-8-2025.html" },
-            { id: 66, title: "Пасть дьявола",
-            genre: "Horror/Thriller", 
-            img: "https://kinogo.ec/uploads/mini/minifull/c33/1785355204-past-djavola.webp", 
-            watchUrl: "https://kinogo.ec/127159-past-djavola.html" },
-            { id: 67, title: "Социальная сеть",
-            genre: "Drama", 
-            img: "https://kinogo.ec/uploads/mini/minifull/d98/1585394093-1223880235.webp", 
-            watchUrl: "https://kinogo.ec/14717--socialnaja-set.html" },
-            { id: 68, title: "Капоте",
-            genre: "Drama", 
-            img: "https://kinogo.ec/uploads/mini/minifull/f46/1785261501-poster.webp", 
-            watchUrl: "https://kinogo.ec/19377-kapote.html" },
-        ];
-
-        let defaultMovies = rawMovies.map(movie => ({
-            ...movie,
-            isPremium: false,
-            sizeMB: getPersistentSizeMB(movie.id)
-        }));
-
-        let currentUser = localStorage.getItem('streamVaultActiveUser');
-        let registeredUsers = JSON.parse(localStorage.getItem('streamVaultUsers')) || {};
         
-        let redeemedCodes = [];
-        let customMovies = [];
-        let unlockedCodeMovies = [];
-        let movies = [...defaultMovies];
-
-        function loadUserProgress() {
-            if (!currentUser) {
-                redeemedCodes = [];
-                customMovies = [];
-                unlockedCodeMovies = [];
-                movies = [...defaultMovies];
-                updateStorageUI();
-                return;
+        function showApp(id, btnElement) { 
+            playPop(); // Звук при клике
+            document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active')); 
+            get(id).classList.add('active'); 
+            if(btnElement) {
+                document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active-tool'));
+                btnElement.classList.add('active-tool');
             }
-
-            const allCodes = JSON.parse(localStorage.getItem('streamVaultUserCodes')) || {};
-            redeemedCodes = allCodes[currentUser] || [];
-
-            const allCustom = JSON.parse(localStorage.getItem('streamVaultUserCustom')) || {};
-            customMovies = allCustom[currentUser] || [];
-
-            const allUnlocked = JSON.parse(localStorage.getItem('streamVaultUserUnlocked')) || {};
-            unlockedCodeMovies = allUnlocked[currentUser] || [];
-
-            movies = [...defaultMovies, ...customMovies, ...unlockedCodeMovies];
-            updateStorageUI();
+            window.scrollTo({ top: 0, behavior: 'smooth' }); 
         }
 
-        function getUsedStorageMB() {
-            if (!currentUser) return 0;
-            const libIds = getUserLibrary();
-            let totalMB = 0;
-            libIds.forEach(id => {
-                const movie = movies.find(m => m.id === id);
-                if (movie && movie.sizeMB) totalMB += movie.sizeMB;
-            });
-            return totalMB;
+        function filterCat(cat, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active-filter')); btn.classList.add('active-filter');
+            document.querySelectorAll('.tabs button').forEach(b => {
+                if(cat === 'all' || b.getAttribute('data-cat') === cat) { b.style.display = 'inline-block'; b.style.animation = 'none'; void b.offsetWidth; b.style.animation = `fadeIn 0.4s ease backwards`;
+                } else { b.style.display = 'none'; }
+            }); get('app-search').value = '';
         }
-
-        function updateStorageUI() {
-            const storageContainer = document.getElementById('storageContainer');
-            storageContainer.style.display = 'flex'; 
-            
-            if (!currentUser) {
-                document.getElementById('storageText').innerText = '0 MB / 10 GB';
-                document.getElementById('storageFill').style.width = '0%';
-                document.getElementById('storageFill').className = 'storage-fill';
-                return;
-            }
-
-            const usedMB = getUsedStorageMB();
-            const fillPercentage = Math.min((usedMB / MAX_STORAGE_MB) * 100, 100);
-            
-            let displayUsed = usedMB > 1000 ? (usedMB / 1024).toFixed(2) + ' GB' : usedMB + ' MB';
-            let displayMax = '10 GB';
-
-            document.getElementById('storageText').innerText = `${displayUsed} / ${displayMax}`;
-            
-            const fillElement = document.getElementById('storageFill');
-            fillElement.style.width = `${fillPercentage}%`;
-            
-            fillElement.className = 'storage-fill';
-            if (fillPercentage > 90) fillElement.classList.add('danger');
-            else if (fillPercentage > 75) fillElement.classList.add('warning');
-        }
-
-        function getUserLibrary() {
-            if (!currentUser) return [];
-            const allLibraries = JSON.parse(localStorage.getItem('streamVaultLibraries')) || {};
-            return allLibraries[currentUser] || [];
-        }
-
-        function saveUserLibrary(libArray) {
-            if (!currentUser) return;
-            const allLibraries = JSON.parse(localStorage.getItem('streamVaultLibraries')) || {};
-            allLibraries[currentUser] = libArray;
-            localStorage.setItem('streamVaultLibraries', JSON.stringify(allLibraries));
-            updateStorageUI();
-        }
-
-        function updateAuthUI() {
-            const authBtn = document.getElementById('tab-auth');
-            const greeting = document.getElementById('userGreeting');
-            const logoutBtn = document.getElementById('btnLogout');
-
-            if (currentUser) {
-                if (authBtn) authBtn.style.display = 'none';
-                greeting.style.display = 'inline';
-                greeting.innerText = `Welcome, ${currentUser}`;
-                logoutBtn.style.display = 'inline-block';
-            } else {
-                if (authBtn) authBtn.style.display = 'inline-block';
-                greeting.style.display = 'none';
-                logoutBtn.style.display = 'none';
-            }
-        }
-
-        function authenticateUser() {
-            const user = document.getElementById('authUsername').value.trim();
-            const pass = document.getElementById('authPassword').value.trim();
-
-            if (!user || !pass) {
-                notify("Please enter both username and password.");
-                return;
-            }
-
-            if (registeredUsers[user]) {
-                if (registeredUsers[user] === pass) {
-                    currentUser = user;
-                    localStorage.setItem('streamVaultActiveUser', user);
-                    notify(`Welcome back, ${user}!`);
-                } else {
-                    notify("Incorrect password. Please try again.");
-                    return;
-                }
-            } else {
-                registeredUsers[user] = pass;
-                localStorage.setItem('streamVaultUsers', JSON.stringify(registeredUsers));
-                currentUser = user;
-                localStorage.setItem('streamVaultActiveUser', user);
-                notify(`Account created! Welcome, ${user}.`);
-            }
-            
-            loadUserProgress();
-            updateAuthUI();
-            switchTab('catalog');
-        }
-
-        function logoutUser() {
-            currentUser = null;
-            localStorage.removeItem('streamVaultActiveUser');
-            document.getElementById('authUsername').value = '';
-            document.getElementById('authPassword').value = '';
-            
-            loadUserProgress();
-            
-            notify("You have quit your session.");
-            updateAuthUI();
-            updateStorageUI();
-            switchTab('catalog'); 
-        }
-
-        function notify(message, type = 'normal') {
-            const toast = document.getElementById('notification-toast');
-            toast.innerText = message;
-            toast.className = ''; 
-            if (type === 'gold') toast.classList.add('gold');
-            if (type === 'danger') toast.classList.add('danger');
-            
-            toast.classList.add('show');
-            setTimeout(() => { toast.classList.remove('show'); }, 2500);
-        }
-
-        function redeemPromoCode() {
-            if (!currentUser) {
-                notify("You must log in to redeem codes.");
-                switchTab('auth');
-                return;
-            }
-
-            const input = document.getElementById('promoInput');
-            const code = input.value.trim().toUpperCase();
-
-            if (!code) {
-                notify("Please enter a code first!");
-                return;
-            }
-
-            if (redeemedCodes.includes(code)) {
-                notify("Code already redeemed!");
-                return;
-            }
-
-            if (availableCodes[code]) {
-                const earnedMovie = availableCodes[code];
-
-                redeemedCodes.push(code);
-                unlockedCodeMovies.push(earnedMovie);
-                movies.push(earnedMovie);
-
-                const allCodes = JSON.parse(localStorage.getItem('streamVaultUserCodes')) || {};
-                allCodes[currentUser] = redeemedCodes;
-                localStorage.setItem('streamVaultUserCodes', JSON.stringify(allCodes));
-
-                const allUnlocked = JSON.parse(localStorage.getItem('streamVaultUserUnlocked')) || {};
-                allUnlocked[currentUser] = unlockedCodeMovies;
-                localStorage.setItem('streamVaultUserUnlocked', JSON.stringify(allUnlocked));
-
-                addToLibrary(earnedMovie.id, true);
-
-                input.value = '';
-                document.getElementById('searchInput').value = '';
-                document.getElementById('genreFilter').value = '';
-
-                notify(`⭐ Code Redeemed! Unlocked: ${earnedMovie.title}`, 'gold');
-                switchTab('catalog');
-            } else {
-                notify("Invalid Promo Code!");
-            }
-        }
-
-        function renderGrid(containerId, dataArray, isLibrary = false) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-            
-            if (dataArray.length === 0) {
-                container.innerHTML = '<p style="color:#8f98a0;">No movies found.</p>';
-                return;
-            }
-
-            const currentLib = getUserLibrary();
-
-            dataArray.forEach(movie => {
-                const card = document.createElement('div');
-                card.className = movie.isPremium ? 'movie-card premium' : 'movie-card';
-                const imgSrc = movie.img || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=500&q=80';
-                
-                const badgeHTML = movie.isPremium ? `<div class="premium-badge">GOLD MOVIE</div>` : '';
-                const sizeBadgeHTML = movie.sizeMB ? `<div class="size-badge">${movie.sizeMB} MB</div>` : '';
-
-                let libraryBtnHTML = '';
-                let watchBtnHTML = '';
-
-                if (!currentUser && (movie.requiresAuth || movie.isPremium)) {
-                    libraryBtnHTML = `<button class="btn btn-locked" onclick="switchTab('auth')">Login</button>`;
-                    watchBtnHTML = `<button class="btn btn-locked" onclick="switchTab('auth')">Locked 🔒</button>`;
-                } else {
-                    if (isLibrary) {
-                        libraryBtnHTML = `<button class="btn btn-remove" onclick="removeFromLibrary(${movie.id})">Remove</button>`;
-                    } else {
-                        if (!currentUser) {
-                            libraryBtnHTML = `<button class="btn btn-locked" onclick="switchTab('auth')">Log to Save</button>`;
-                        } else if (currentLib.includes(movie.id)) {
-                            libraryBtnHTML = `<button class="btn btn-added">Saved ✓</button>`;
-                        } else {
-                            libraryBtnHTML = `<button class="btn btn-add" onclick="addToLibrary(${movie.id})">Save Movie</button>`;
-                        }
-                    }
-                    watchBtnHTML = `<button class="btn btn-watch" onclick="watchMovie('${movie.watchUrl}')">Watch</button>`;
-                }
-
-                card.innerHTML = `
-                    ${badgeHTML}
-                    ${sizeBadgeHTML}
-                    <img src="${imgSrc}" class="movie-img" alt="${movie.title}" referrerpolicy="no-referrer">
-                    <div class="movie-info">
-                        <h3 class="movie-title">${movie.title}</h3>
-                        <div class="movie-genre">${movie.genre}</div>
-                        <div class="card-actions">
-                            ${libraryBtnHTML}
-                            ${watchBtnHTML}
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function addToLibrary(id, silent = false) {
-            if (!currentUser) {
-                notify("You must be logged in to save movies!");
-                switchTab('auth');
-                return;
-            }
-
-            const movieToSave = movies.find(m => m.id === id);
-            if (!movieToSave) return;
-
-            const currentUsed = getUsedStorageMB();
-            const spaceNeeded = movieToSave.sizeMB || 0;
-
-            if (currentUsed + spaceNeeded > MAX_STORAGE_MB) {
-                notify(`Not enough storage! Needed: ${spaceNeeded} MB`, 'danger');
-                return;
-            }
-
-            const lib = getUserLibrary();
-            if (!lib.includes(id)) {
-                lib.push(id);
-                saveUserLibrary(lib);
-                if(!silent) notify(`Saved! Cost ${spaceNeeded} MB of storage.`);
-                handleSearch();
-            }
-        }
-
-        function removeFromLibrary(id) {
-            let lib = getUserLibrary();
-            lib = lib.filter(movieId => movieId !== id);
-            saveUserLibrary(lib);
-            notify("Removed from library. Storage freed!");
-            handleSearch();
-        }
-
-        function addCustomMovie() {
-            if (!currentUser) {
-                notify("You must be logged in to add movies!");
-                switchTab('auth');
-                return;
-            }
-
-            const title = document.getElementById('newTitle').value.trim();
-            const genre = document.getElementById('newGenre').value.trim();
-            const img = document.getElementById('newImg').value.trim();
-            const watchUrl = document.getElementById('newWatchUrl').value.trim();
-
-            if (!title || !genre) {
-                notify("Title and Genre are required!");
-                return;
-            }
-
-            // Normal movies can be randomized normally (50-400MB)
-            const randomSize = Math.floor(Math.random() * (400 - 50 + 1)) + 50;
-
-            const newMovie = {
-                id: Date.now(), 
-                title: title,
-                genre: genre,
-                img: img,
-                watchUrl: watchUrl || 'https://kinogo.ec',
-                isPremium: false,
-                requiresAuth: false,
-                sizeMB: randomSize 
-            };
-
-            customMovies.push(newMovie);
-            movies.push(newMovie);
-            
-            const allCustom = JSON.parse(localStorage.getItem('streamVaultUserCustom')) || {};
-            allCustom[currentUser] = customMovies;
-            localStorage.setItem('streamVaultUserCustom', JSON.stringify(allCustom));
-            
-            document.getElementById('newTitle').value = '';
-            document.getElementById('newGenre').value = '';
-            document.getElementById('newImg').value = '';
-            document.getElementById('newWatchUrl').value = '';
-            
-            document.getElementById('searchInput').value = '';
-            document.getElementById('genreFilter').value = '';
-
-            notify(`${title} added to the catalog!`);
-            switchTab('catalog');
-        }
-
-        function handleSearch() {
-            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
-            const genreQuery = document.getElementById('genreFilter').value.toLowerCase();
-            const activeTabObj = document.querySelector('.nav-links .active');
-            const activeTab = activeTabObj ? activeTabObj.id : 'tab-catalog';
-            
-            let baseMovies = movies;
-            
-            if (activeTab === 'tab-library') {
-                if (!currentUser) {
-                    document.getElementById('libraryGrid').innerHTML = '<p style="color:#8f98a0;">Please log in to view your library.</p>';
-                    return;
-                }
-                const lib = getUserLibrary();
-                baseMovies = movies.filter(m => lib.includes(m.id));
-            }
-
-            const filteredMovies = baseMovies.filter(m => {
-                const matchesTitle = m.title.toLowerCase().includes(searchQuery);
-                const matchesGenre = genreQuery === "" || m.genre.toLowerCase().includes(genreQuery);
-                return matchesTitle && matchesGenre;
-            });
-
-            if (activeTab === 'tab-catalog') {
-                renderGrid('catalogGrid', filteredMovies);
-            } else if (activeTab === 'tab-library') {
-                renderGrid('libraryGrid', filteredMovies, true);
-            }
-        }
-
-        function watchMovie(url) {
-            if (url.startsWith('http')) {
-                window.open(url, '_blank');
-            } else {
-                window.location.href = url;
-            }
-        }
-
-        function switchTab(tabName) {
-            if (!currentUser && (tabName === 'library' || tabName === 'add')) {
-                notify("You must be logged in to access this page.");
-                tabName = 'auth';
-            }
-
-            document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
-            
-            document.getElementById('view-' + tabName).classList.add('active');
-            
-            const tabButton = document.getElementById('tab-' + tabName);
-            if (tabButton) tabButton.classList.add('active');
-
-            handleSearch();
-        }
-
-        loadUserProgress();
-        updateAuthUI();
-        switchTab('catalog');
-        // --- THEME TOGGLE LOGIC ---
-function toggleTheme() {
-    const body = document.body;
-    body.classList.toggle('light-mode');
-    
-    const isLight = body.classList.contains('light-mode');
-    localStorage.setItem('streamVaultTheme', isLight ? 'light' : 'dark');
-    
-    // Меняем иконку на кнопке
-    document.getElementById('themeToggleBtn').innerText = isLight ? '🌙' : '☀️';
-}
-
-// Загружаем сохраненную тему при обновлении страницы
-function loadSavedTheme() {
-    if (localStorage.getItem('streamVaultTheme') === 'light') {
-        document.body.classList.add('light-mode');
-        const btn = document.getElementById('themeToggleBtn');
-        if (btn) btn.innerText = '🌙';
-    }
-}
-
-// Вызываем функцию при запуске
-loadSavedTheme();
         
+        function searchApps() {
+            let q = get('app-search').value.toLowerCase();
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active-filter'));
+            document.querySelectorAll('.tabs button').forEach(b => { b.style.display = b.innerText.toLowerCase().includes(q) ? 'inline-block' : 'none'; });
+        }
+
+        // --- ЛОГИКА ИНСТРУМЕНТОВ ---
+        let t=1500, tmr=null, d=1500; function updateT(){out('timer-display',`${Math.floor(t/60).toString().padStart(2,'0')}:${(t%60).toString().padStart(2,'0')}`);} function setTimer(){let v=get('timer-input').value;if(v>0){t=v*60;d=t;updateT();}} function startTimer(){if(!tmr)tmr=setInterval(()=>{if(t>0){t--;updateT();}else{resetTimer();alert("Время вышло!");}},1000);} function resetTimer(){clearInterval(tmr);tmr=null;t=d;updateT();}
+        
+        // Задачи с автосохранением
+        function addTask(){let v=get('todo-input').value;if(!v.trim())return;get('todo-list').innerHTML+=`<li><span onclick="this.parentElement.classList.toggle('checked'); saveData()" style="cursor:pointer;flex-grow:1;">${v}</span><button style="background:#ef4444;color:white;border:none;border-radius:5px;padding:5px;cursor:pointer;" onclick="this.parentElement.remove(); saveData()">X</button></li>`;get('todo-input').value=''; saveData();}
+        
+        let rs='wait',rt,rst;function handleReaction(){let a=get('reaction-area');if(rs==='wait'){a.style.background='#f59e0b';a.innerText='Ждите зеленый...';rs='ready';rt=setTimeout(()=>{a.style.background='#10b981';a.innerText='КЛИКАЙ!';rst=Date.now();rs='done';},Math.random()*3000+1000);}else if(rs==='ready'){clearTimeout(rt);a.style.background='#ef4444';a.innerText='Слишком рано!';rs='wait';}else if(rs==='done'){a.style.background='#3b82f6';a.innerText=`${Date.now()-rst} мс!`;rs='wait';}}
+        const cvs=get('physics-canvas'),ctx=cvs.getContext('2d'),bls=[];cvs.addEventListener('click',e=>{let r=cvs.getBoundingClientRect();bls.push({x:e.clientX-r.left,y:e.clientY-r.top,dx:(Math.random()-0.5)*6,dy:2,rad:12,c:`hsl(${Math.random()*360},70%,60%)`});});function anim(){ctx.clearRect(0,0,cvs.width,cvs.height);bls.forEach(b=>{b.dy+=0.5;b.y+=b.dy;b.x+=b.dx;if(b.y+b.rad>cvs.height){b.y=cvs.height-b.rad;b.dy*=-0.8;b.dx*=0.99;}if(b.x+b.rad>cvs.width||b.x-b.rad<0)b.dx*=-1;ctx.beginPath();ctx.arc(b.x,b.y,b.rad,0,Math.PI*2);ctx.fillStyle=b.c;ctx.fill();});requestAnimationFrame(anim);}anim();
+        function generatePassword(){let c="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*",l=get('pass-length').value,p="";for(let i=0;i<l;i++)p+=c[Math.floor(Math.random()*c.length)];out('pass-output',p);}
+        
+        // Расходы с автосохранением
+        function addExpense(){let n=get('exp-name').value,c=parseFloat(get('exp-cost').value);if(!n||isNaN(c))return;expTotalVar+=c;out('exp-total',expTotalVar.toFixed(2));get('expense-list').innerHTML+=`<li>${n} <b>$${c.toFixed(2)}</b> <button style="background:transparent;border:none;color:gray;cursor:pointer;" onclick="expTotalVar-=${c};document.getElementById('exp-total').innerText=expTotalVar.toFixed(2);this.parentElement.remove();saveData()">x</button></li>`; saveData();}
+        
+        function countText(){let v=get('text-input').value;out('char-count',v.length);out('word-count',v.trim()?v.trim().split(/\s+/).length:0);}
+        function updateColor(){let h=get('color-input').value;out('hex-output',h.toUpperCase());get('color-box').style.background=h;}
+        function rollDice(){out('dice-output',['⚀','⚁','⚂','⚃','⚄','⚅'][Math.floor(Math.random()*6)]);}
+        function calcBMI(){let w=get('bmi-w').value,h=get('bmi-h').value/100;if(w&&h)out('bmi-out',(w/(h*h)).toFixed(1));}
+        let swT=0,swI=null;function startSW(){if(!swI)swI=setInterval(()=>{swT++;out('sw-out',(swT/10).toFixed(1)+'с');},100);}function stopSW(){clearInterval(swI);swI=null;}function resetSW(){stopSW();swT=0;out('sw-out','0.0с');}
+        const qs=["В здоровом теле здоровый дух.", "Простота — высшая ступень искусства.", "Еда должна быть лекарством.", "Делай сегодня то, за что завтра скажешь спасибо."];function getQuote(){out('quote-out',`"${qs[Math.floor(Math.random()*qs.length)]}"`);}
+        function calcTip(){let b=parseFloat(get('tip-bill').value),p=parseFloat(get('tip-perc').value);if(b&&p)out('tip-out',`$${(b+(b*(p/100))).toFixed(2)} всего`);}
+        setInterval(()=>out('clock-out',new Date().toLocaleTimeString()),1000);
+        function flipCoin(){out('coin-out',Math.random()>0.5?"🪙 Орел":"🪙 Решка");}
+        function calcTemp(t){let v=get('temp-in').value;if(!v)return;out('temp-out',t==='c'?((v-32)*5/9).toFixed(1)+" °C":((v*9/5)+32).toFixed(1)+" °F");}
+        function calcLen(t){let v=get('len-in').value;if(!v)return;out('len-out',t==='cm'?(v*2.54).toFixed(2)+" см":(v/2.54).toFixed(2)+" дюймов");}
+        function calcWgt(t){let v=get('wgt-in').value;if(!v)return;out('wgt-out',t==='kg'?(v/2.205).toFixed(2)+" кг":(v*2.205).toFixed(2)+" фунтов");}
+        function revText(){out('rev-out',get('rev-in').value.split('').reverse().join(''));}
+        function convCase(t){let v=get('case-in').value;out('case-out',t==='up'?v.toUpperCase():v.toLowerCase());}
+        function calcAge(){let d=new Date(get('age-in').value);if(d)out('age-out',Math.abs(new Date(Date.now()-d.getTime()).getUTCFullYear()-1970)+" Лет");}
+        function calcPct(){let p=get('pct-1').value,n=get('pct-2').value;if(p&&n)out('pct-out',(n*(p/100)).toFixed(2));}
+        function calcRNG(){let m=parseInt(get('rng-min').value),x=parseInt(get('rng-max').value);if(x>m)out('rng-out',Math.floor(Math.random()*(x-m+1))+m);}
+        function findDay(){let d=new Date(get('day-in').value);if(d){let ds=["Воскресенье","Понедельник","Вторник","Среда","Четверг","Пятница","Суббота"];out('day-out',ds[d.getDay()]);}}
+        function doB64(t){let v=get('b64-in').value;try{out('b64-out',t==='enc'?btoa(v):atob(v));}catch(e){out('b64-out','Ошибка');}}
+        function genQR(inId, outId){let v=get(inId).value,img=get(outId);if(v){img.src=`https://api.qrserver.com/v1/create-qr-code/?size=150x150&color=f59e0b&bgcolor=ffffff&data=${encodeURIComponent(v)}`;img.style.display='inline';}}
+        function countVowels(){let m=get('vow-in').value.match(/[aeiouаоуэыяёюеи]/gi);out('vow-out',(m?m.length:0)+" Гласных");}
+        function checkLeap(){let y=get('leap-in').value;if(y)out('leap-out',((y%4===0&&y%100!==0)||y%400===0)?"Да, високосный!":"Нет");}
+        function toRoman(){const r={M:1000,CM:900,D:500,CD:400,C:100,XC:90,L:50,XL:40,X:10,IX:9,V:5,IV:4,I:1};let n=get('rom-in').value,s='';for(let i in r){while(n>=r[i]){s+=i;n-=r[i];}}out('rom-out',s||"-");}
+        function getKey(e){out('key-out',e.keyCode);get('key-in').value='';}
+        function genGrad(){let c1=get('g-c1').value,c2=get('g-c2').value,s=`linear-gradient(to right, ${c1}, ${c2})`;get('grad-box').style.background=s;out('grad-out',`background: ${s};`);}
+        function getBat(){if(navigator.getBattery){navigator.getBattery().then(b=>out('bat-out',`${Math.round(b.level*100)}% ${b.charging?"⚡":""}`))}else{out('bat-out','Не поддерживается');}}
+
+        function scaleRecipe() { let amt = parseFloat(get('scl-amt').value), oldY = parseFloat(get('scl-old').value), newY = parseFloat(get('scl-new').value); if(amt && oldY && newY) out('scl-out', `${(amt * (newY/oldY)).toFixed(2)} Нужно`); }
+        function calcCG() { let w = parseFloat(get('cg-ing').value), c = parseFloat(get('cg-amt').value); if(w && c) out('cg-out', `${(w * c).toFixed(0)} Грамм`); }
+        function getSub() { const subsRu = {"buttermilk":"1 ст. молока + 1 ст.л. сока лимона","egg":"1/4 ст. яблочного пюре ИЛИ 1/2 банана","bpowder":"1/4 ч.л. соды + 1/2 ч.л. лимонной кислоты","brownsugar":"1 ст. сахара + 1 ст.л. патоки"}; out('sub-out', subsRu[get('sub-in').value]); }
+        function calcOven(t) { let temp = parseFloat(get('ov-in').value); if(!temp) return; if(t === 'f') out('ov-out', `${Math.round((temp - 32) * 5/9)} °C`); else out('ov-out', `${Math.round((temp * 9/5) + 32)} °F`); }
+        let waterCount = 0; function addWater() { if(waterCount < 20) waterCount++; out('wat-count', `${waterCount} / 8`); } function resetWater() { waterCount = 0; out('wat-count', `0 / 8`); }
+        function calcSleep() { let now = new Date().getTime(), res = []; for(let i=3; i<=6; i++) { let w = new Date(now + (i * 5400000) + 900000); res.push(`${i} Циклов: ${w.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`); } out('slp-out', res.join('<br>')); }
+        function addGroc() { let v = get('groc-in').value; if(!v.trim()) return; get('groc-list').innerHTML += `<li><span onclick="this.parentElement.classList.toggle('checked')" style="cursor:pointer;flex-grow:1;">🛒 ${v}</span><button style="background:transparent;border:none;color:white;cursor:pointer;" onclick="this.parentElement.remove()">❌</button></li>`; get('groc-in').value = ''; }
+        function calcSplit() { let b = parseFloat(get('splt-bill').value), p = parseFloat(get('splt-ppl').value); if(b && p > 0) out('splt-out', `$${(b/p).toFixed(2)} с каждого`); }
+        
+        // Привычки с автосохранением
+        function addHabit() { let v = get('hab-in').value; if(!v.trim()) return; get('hab-list').innerHTML += `<li><label style="cursor:pointer;"><input type="checkbox" style="width:auto;" onchange="saveData()"> ${v}</label><button style="background:transparent;border:none;color:gray;cursor:pointer;" onclick="this.parentElement.remove(); saveData()">x</button></li>`; get('hab-in').value = ''; saveData(); }
+        
+        function addExpire() { let it = get('exp-item').value, dt = get('exp-date').value; if(!it || !dt) return; let d = Math.ceil((new Date(dt) - new Date()) / 86400000); let c = d < 3 ? '#ef4444' : (d < 7 ? '#f59e0b' : '#10b981'); out('exp-res', `<span style="color:${c}">${it}: ${d} Дней осталось</span>`); }
+        let cafTot = 0; function addCaf() { cafTot += parseInt(get('caf-sel').value); out('caf-tot', cafTot); get('caf-tot').style.color = cafTot > 400 ? '#ef4444' : '#10b981'; }
+        function calcMac() { let c = parseFloat(get('mac-cal').value); if(c) out('mac-out', `Белки: ${Math.round((c*0.3)/4)}г<br>Углеводы: ${Math.round((c*0.4)/4)}г<br>Жиры: ${Math.round((c*0.3)/9)}г`); }
+        function addPlant() { let n = get('plt-name').value, d = get('plt-days').value; if(n && d) { get('plt-list').innerHTML += `<li>🌱 ${n} (Каждые ${d} дней) <button style="background:transparent;border:none;color:white;cursor:pointer;" onclick="this.parentElement.remove()">❌</button></li>`; get('plt-name').value=''; get('plt-days').value=''; } }
+        function calcRead() { let pgs = parseFloat(get('rd-pgs').value), wp = parseFloat(get('rd-wp').value); if(pgs && wp) { let mins = (pgs * wp) / 250; let hrs = Math.floor(mins / 60); out('rd-out', hrs > 0 ? `${hrs}ч ${Math.round(mins%60)}мин` : `${Math.round(mins)} мин`); } }
+        let hTmr = null, hTime = 45, isWork = true; function updateHIIT() { out('hiit-disp', `00:${hTime.toString().padStart(2,'0')}`); } function startHIIT() { if(hTmr) return; out('hiit-phase', isWork ? 'РАБОТАЕМ!' : 'ОТДЫХ'); get('hiit-phase').style.color = isWork ? '#ef4444' : '#10b981'; hTmr = setInterval(() => { hTime--; updateHIIT(); if(hTime <= 0) { isWork = !isWork; hTime = isWork ? 45 : 15; out('hiit-phase', isWork ? 'РАБОТАЕМ!' : 'ОТДЫХ'); get('hiit-phase').style.color = isWork ? '#ef4444' : '#10b981'; } }, 1000); } function stopHIIT() { clearInterval(hTmr); hTmr = null; hTime = 45; isWork = true; updateHIIT(); out('hiit-phase', 'ГОТОВ'); }
+        function calcPasta() { let p = parseFloat(get('pas-ppl').value); if(p) out('pas-out', `🍝 Паста: ${p * 75}г<br>🥫 Соус: ${p * 150}г`); }
+
+        function calcDisc(){let p=parseFloat(get('dsc-p').value), d=parseFloat(get('dsc-d').value); if(p&&d) out('dsc-out', `Итого: ${(p-(p*d/100)).toFixed(2)}₽<br><span style="font-size:1rem;color:#10b981;">(Экономия: ${(p*d/100).toFixed(2)}₽)</span>`);}
+        function calcFuel(){let d=parseFloat(get('fl-d').value), c=parseFloat(get('fl-c').value), p=parseFloat(get('fl-p').value); if(d&&c&&p) out('fl-out', `Итого: ${((d/100)*c*p).toFixed(2)} ₽<br><span style="font-size:1rem;">(Потребуется ${((d/100)*c).toFixed(1)} л)</span>`);}
+        function calcLoan(){let s=parseFloat(get('ln-s').value), r=parseFloat(get('ln-r').value), m=parseFloat(get('ln-m').value); if(s&&r&&m){let p=r/100/12; let pay=s*(p+p/(Math.pow(1+p,m)-1)); out('ln-out', `В месяц: ${pay.toFixed(2)} ₽`);}}
+        function calcDates(){let d1=new Date(get('dt-1').value), d2=new Date(get('dt-2').value); if(d1&&d2) out('dt-out', `${Math.abs(Math.ceil((d2-d1)/(1000*60*60*24)))} дней`);}
+        function getSizes(){let s={"XS":"RU: 42 | US: 2 | EU: 34","S":"RU: 44 | US: 4 | EU: 36","M":"RU: 46 | US: 6 | EU: 38","L":"RU: 48 | US: 8 | EU: 40","XL":"RU: 50 | US: 10 | EU: 42"}; out('sz-out', s[get('sz-in').value]);}
+        function speakText(){let t=get('spk-in').value; if(t&&'speechSynthesis' in window){let u=new SpeechSynthesisUtterance(t); u.lang='ru-RU'; speechSynthesis.speak(u);}}
+        function calcBurn(){let w=parseFloat(get('brn-w').value), t=parseFloat(get('brn-t').value), m=parseFloat(get('brn-a').value); if(w&&t) out('brn-out', `~${Math.round(m*w*(t/60))} ккал`);}
+        function genWiFi(){let s=get('wf-s').value, p=get('wf-p').value, i=get('wf-out'); if(s){i.src=`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent('WIFI:T:WPA;S:'+s+';P:'+p+';;')}`; i.style.display='inline';}}
+        function calcVAT(add){let p=parseFloat(get('vat-in').value); if(p) out('vat-out', add ? `Сумма с НДС: ${(p*1.2).toFixed(2)}₽<br><span style="font-size:1rem;">(Сам НДС: ${(p*0.2).toFixed(2)}₽)</span>` : `Сумма без НДС: ${(p/1.2).toFixed(2)}₽<br><span style="font-size:1rem;color:#ef4444;">(Сам НДС: ${(p-p/1.2).toFixed(2)}₽)</span>`);}
+
+        let mqAns = 0; function newMath() { let ops = ['+', '-', '*']; let op = ops[Math.floor(Math.random()*3)]; let n1 = Math.floor(Math.random()*15)+1, n2 = Math.floor(Math.random()*15)+1; if(op === '+') mqAns = n1 + n2; if(op === '-') mqAns = n1 - n2; if(op === '*') { n1 = Math.floor(Math.random()*9)+2; n2 = Math.floor(Math.random()*9)+2; mqAns = n1 * n2; } out('mq-q', `${n1} ${op} ${n2} = ?`); get('mq-in').value = ''; out('mq-out', '-'); } function checkMath() { let u = parseInt(get('mq-in').value); out('mq-out', u === mqAns ? '✅ Верно!' : '❌ Ошибка!'); } newMath();
+        
+        // Загружаем сохраненные данные при старте
+        loadData();
     </script>
-    <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleTheme()">☀️</button>
 </body>
 </html>
